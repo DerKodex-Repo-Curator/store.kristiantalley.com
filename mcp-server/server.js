@@ -14,9 +14,6 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import {
   ListToolsRequestSchema,
   CallToolRequestSchema,
-  TextContent,
-  ErrorCode,
-  McpError,
 } from '@modelcontextprotocol/sdk/types.js'
 import { createStdioTransport } from './transports/stdio.js'
 import { config } from './config.js'
@@ -57,10 +54,17 @@ async function main() {
   console.error(`📂 Data source: ${config.dataSource}`)
 
   // Create MCP server
-  const server = new Server({
-    name: 'ktt-store',
-    version: '1.0.0',
-  })
+  const server = new Server(
+    {
+      name: 'ktt-store',
+      version: '1.0.0',
+    },
+    {
+      capabilities: {
+        tools: {},
+      },
+    }
+  )
 
   // Initialize data store
   const dataStore = createDataStore()
