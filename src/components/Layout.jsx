@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import CartDrawer from './CartDrawer'
+import SupportChat from './SupportChat'
 
 /**
  * Main layout with fixed left sidebar matching kristiantalley.com
@@ -13,6 +14,7 @@ function Layout() {
         <Outlet />
       </main>
       <CartDrawer />
+      <SupportChat />
     </div>
   )
 }
