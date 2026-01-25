@@ -1,0 +1,183 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Styles matching kristiantalley.com aesthetic
+ * Minimal, clean, art-focused
+ */
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-white text-black font-sans antialiased;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* No serif fonts - everything is clean sans-serif */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans font-normal;
+  }
+
+  a {
+    @apply text-black no-underline;
+  }
+
+  a:hover {
+    @apply text-gray-500;
+  }
+
+  img {
+    @apply max-w-full h-auto;
+  }
+}
+
+@layer components {
+  /* Left sidebar matching kristiantalley.com */
+  .sidebar {
+    @apply fixed left-0 top-0 h-full bg-white z-40;
+    @apply flex flex-col justify-between py-8 px-6;
+    width: 170px;
+    border-right: 1px solid #e0e0e0;
+  }
+
+  /* Navigation links - all caps, small, spaced */
+  .nav-link {
+    @apply block text-nav uppercase tracking-wide py-1;
+    @apply text-black transition-colors duration-200;
+  }
+
+  .nav-link:hover {
+    @apply text-gray-500;
+  }
+
+  .nav-link.active {
+    @apply text-gray-500;
+  }
+
+  /* Main content area */
+  .main-content {
+    @apply min-h-screen;
+    margin-left: 170px;
+  }
+
+  /* Masonry grid for artwork */
+  .masonry-grid {
+    column-count: 4;
+    column-gap: 16px;
+    padding: 24px;
+  }
+
+  .masonry-item {
+    @apply mb-4 break-inside-avoid;
+  }
+
+  .masonry-item img {
+    @apply w-full block;
+  }
+
+  /* Product card - minimal */
+  .product-card {
+    @apply relative mb-4 break-inside-avoid;
+  }
+
+  .product-card img {
+    @apply w-full block transition-opacity duration-200;
+  }
+
+  .product-card:hover img {
+    @apply opacity-90;
+  }
+
+  .product-info {
+    @apply py-2;
+  }
+
+  .product-title {
+    @apply text-sm font-normal;
+  }
+
+  .product-price {
+    @apply text-sm text-gray-600;
+  }
+
+  /* Buttons - minimal, black/white */
+  .btn {
+    @apply inline-block px-6 py-2 text-xs uppercase tracking-wider;
+    @apply border border-black text-black bg-white;
+    @apply transition-all duration-200;
+  }
+
+  .btn:hover {
+    @apply bg-black text-white;
+  }
+
+  .btn-filled {
+    @apply bg-black text-white;
+  }
+
+  .btn-filled:hover {
+    @apply bg-gray-800;
+  }
+
+  /* Horizontal line separator */
+  .separator {
+    @apply w-full h-px bg-gray-300 my-6;
+  }
+
+  /* Form inputs - minimal */
+  .input {
+    @apply w-full px-3 py-2 text-sm;
+    @apply border border-gray-300 bg-white;
+    @apply focus:outline-none focus:border-black;
+    @apply transition-colors duration-200;
+  }
+
+  .input::placeholder {
+    @apply text-gray-400;
+  }
+}
+
+@layer utilities {
+  /* Responsive masonry columns */
+  @media (max-width: 1200px) {
+    .masonry-grid {
+      column-count: 3;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .masonry-grid {
+      column-count: 2;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .masonry-grid {
+      column-count: 1;
+    }
+
+    .sidebar {
+      @apply w-full h-auto relative border-r-0 border-b;
+      @apply flex-row items-center justify-between py-4 px-4;
+    }
+
+    .main-content {
+      @apply ml-0;
+    }
+  }
+
+  /* Hide scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
