@@ -1,0 +1,23 @@
+{
+  "name": "ktt-store-mcp",
+  "version": "1.0.0",
+  "description": "MCP Server for KTT Art Store - exposes product catalog and cart management to AI tools",
+  "type": "module",
+  "main": "server.js",
+  "bin": {
+    "ktt-store-mcp": "server.js"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js --transport=stdio",
+    "sync": "node ../scripts/sync-data.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.3.0",
+    "zod": "^3.22.0",
+    "uuid": "^9.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
