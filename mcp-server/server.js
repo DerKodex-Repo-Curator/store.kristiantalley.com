@@ -11,13 +11,17 @@
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
+import {
+  ListToolsRequestSchema,
+  CallToolRequestSchema,
+  TextContent,
+  ErrorCode,
+  McpError,
+} from '@modelcontextprotocol/sdk/types.js'
 import { createStdioTransport } from './transports/stdio.js'
 import { config } from './config.js'
 import { createDataStore } from './data/store.js'
-import { registerProductTools } from './tools/products.js'
-import { registerCartTools } from './tools/cart.js'
-import { registerInfoTools } from './tools/info.js'
-import { registerCustomTools } from './tools/custom.js'
+import { buildToolDefinitions, handleToolCall } from './tools/index.js'
 
 /**
  * Parse command line arguments
@@ -62,16 +66,43 @@ async function main() {
   const dataStore = createDataStore()
   console.error('💾 Data store initialized')
 
-  // Register tools
-  registerProductTools(server, dataStore)
-  registerCartTools(server, dataStore)
-  registerInfoTools(server, dataStore)
-  registerCustomTools(server, dataStore)
+  // Build tool definitions
+  const toolDefinitions = buildToolDefinitions()
   console.error('🔧 Tools registered: 12 total')
   console.error('   Product Discovery: list_products, search_products, get_product_details')
   console.error('   Cart Management: create_cart_session, add_to_cart, view_cart, remove_from_cart')
   console.error('   Store Info: get_store_info, get_product_types, get_available_tags')
   console.error('   Custom Requests: submit_commission_inquiry, get_contact_info')
+
+  // Handle ListTools requests
+  server.setRequestHandler(ListToolsRequestSchema, async () => {
+    return { tools: toolDefinitions }
+  })
+
+  // Handle CallTool requests
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    try {
+      const result = await handleToolCall(request.params.name, request.params.arguments || {}, dataStore)
+      return {
+        content: [
+          {
+            type: 'text',
+            text: result,
+          },
+        ],
+      }
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error: ${error.message}`,
+          },
+        ],
+        isError: true,
+      }
+    }
+  })
 
   // Set up transport
   let transport
