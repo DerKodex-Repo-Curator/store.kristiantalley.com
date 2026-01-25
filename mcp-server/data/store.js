@@ -279,12 +279,117 @@ export class JSONDataStore extends DataStore {
 }
 
 /**
+ * Shopify Storefront API data store (Phase 5)
+ * Reads from Shopify API instead of local JSON
+ * Requires VITE_SHOPIFY_STORE_DOMAIN and VITE_SHOPIFY_STOREFRONT_ACCESS_TOKEN
+ */
+export class ShopifyDataStore extends DataStore {
+  constructor() {
+    super()
+    this.storeDomain = config.shopify.storeDomain
+    this.accessToken = config.shopify.storefrontAccessToken
+    this.apiVersion = config.shopify.apiVersion
+  }
+
+  async getStorefrontUrl() {
+    return `https://${this.storeDomain}/api/${this.apiVersion}/graphql.json`
+  }
+
+  async shopifyFetch(query, variables = {}) {
+    if (!this.storeDomain || !this.accessToken) {
+      throw new Error('Shopify credentials not configured')
+    }
+
+    try {
+      const response = await fetch(await this.getStorefrontUrl(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Shopify-Storefront-Access-Token': this.accessToken,
+        },
+        body: JSON.stringify({ query, variables }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Shopify API error: ${response.status}`)
+      }
+
+      const json = await response.json()
+
+      if (json.errors) {
+        console.error('Shopify GraphQL errors:', json.errors)
+        throw new Error(json.errors[0]?.message || 'GraphQL error')
+      }
+
+      return json.data
+    } catch (error) {
+      console.error('Shopify fetch error:', error)
+      throw error
+    }
+  }
+
+  async getProducts(filters = {}) {
+    // TODO: Implement Shopify product query with filters
+    throw new Error('ShopifyDataStore not yet implemented')
+  }
+
+  async getProductByHandle(handle) {
+    // TODO: Implement Shopify product by handle query
+    throw new Error('ShopifyDataStore not yet implemented')
+  }
+
+  async searchProducts(query) {
+    // TODO: Implement Shopify product search
+    throw new Error('ShopifyDataStore not yet implemented')
+  }
+
+  async getProductTypes() {
+    // TODO: Aggregate product types from Shopify API
+    throw new Error('ShopifyDataStore not yet implemented')
+  }
+
+  async getAvailableTags() {
+    // TODO: Aggregate tags from Shopify product metafields
+    throw new Error('ShopifyDataStore not yet implemented')
+  }
+
+  async createCart(sessionId) {
+    // TODO: Create Shopify cart and link to session
+    throw new Error('ShopifyDataStore not yet implemented')
+  }
+
+  async getCart(sessionId) {
+    // TODO: Fetch Shopify cart by session
+    throw new Error('ShopifyDataStore not yet implemented')
+  }
+
+  async addToCart(sessionId, productHandle, quantity) {
+    // TODO: Use Shopify cart API to add items
+    throw new Error('ShopifyDataStore not yet implemented')
+  }
+
+  async removeFromCart(sessionId, lineItemId) {
+    // TODO: Use Shopify cart API to remove items
+    throw new Error('ShopifyDataStore not yet implemented')
+  }
+
+  async addInquiry(inquiry) {
+    // Store inquiries locally even with Shopify backend
+    // (Could also integrate with Shopify orders or custom app)
+    throw new Error('ShopifyDataStore not yet implemented')
+  }
+}
+
+/**
  * Factory function to create appropriate data store
  */
 export function createDataStore() {
   if (config.dataSource === 'shopify') {
-    // TODO: Implement ShopifyDataStore when API credentials available
-    console.warn('Shopify data source not yet implemented, using JSON')
+    console.warn(
+      'Shopify data source not yet fully implemented. Ensure VITE_SHOPIFY_STORE_DOMAIN and VITE_SHOPIFY_STOREFRONT_ACCESS_TOKEN are set.'
+    )
+    // TODO: Uncomment when implementation complete
+    // return new ShopifyDataStore()
     return new JSONDataStore()
   }
 

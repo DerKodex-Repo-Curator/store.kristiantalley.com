@@ -1,0 +1,40 @@
+[Unit]
+Description=KTT Art Store MCP Server
+Documentation=https://kristiantalley.com
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/store.kristiantalley.com/mcp-server
+Environment="NODE_ENV=production"
+Environment="MCP_TRANSPORT=http"
+Environment="MCP_PORT=3001"
+Environment="MCP_DATA_SOURCE=json"
+
+# Load Shopify credentials if available
+EnvironmentFile=-/etc/store.kristiantalley.com/env
+
+ExecStart=/usr/bin/node server.js --transport=http --port=3001
+
+# Auto-restart on failure
+Restart=always
+RestartSec=10
+StartLimitInterval=60s
+StartLimitBurst=3
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mcp-server
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target
