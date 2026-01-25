@@ -51,6 +51,14 @@ function Sidebar() {
           >
             Contact
           </NavLink>
+          <NavLink
+            to="/help"
+            className={({ isActive }) =>
+              `nav-link ${isActive ? 'active' : ''}`
+            }
+          >
+            Help
+          </NavLink>
         </nav>
       </div>
 

@@ -5,6 +5,7 @@ import ShopPage from './pages/ShopPage'
 import ProductPage from './pages/ProductPage'
 import AboutPage from './pages/AboutPage'
 import ContactPage from './pages/ContactPage'
+import HelpPage from './pages/HelpPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Route path="shop/:handle" element={<ProductPage />} />
         <Route path="about" element={<AboutPage />} />
         <Route path="contact" element={<ContactPage />} />
+        <Route path="help" element={<HelpPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
