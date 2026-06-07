@@ -1,16 +1,19 @@
 /**
  * KTT Store Support Bot
  * LLM-powered assistant using Ollama API at YOUR_MCP_DOMAIN
+ * Uses Qwen 3.6 with tool calling capabilities
  */
 
-const OLLAMA_URL = 'https://YOUR_MCP_DOMAIN'
-const MODEL = 'incept5/llama3.1-claude:latest'
+const OLLAMA_URL = import.meta.env.VITE_OLLAMA_URL || 'https://YOUR_MCP_DOMAIN'
+const MODEL = import.meta.env.VITE_MODEL || 'qwen36-opus:latest'
+const MCP_BASE = import.meta.env.VITE_MCP_TOOLS_URL || `${OLLAMA_URL}/mcp`
+const MCP_TOOLS_URL = `${MCP_BASE}/tools`
 const REQUEST_TIMEOUT = 30000
 
 /**
  * System prompt providing context about the artist and store
  */
-const SYSTEM_CONTEXT = `You are a helpful, professional support assistant for KTT (Kristian Talley), an artist who sells original drawings, illustrations, and prints.
+const SYSTEM_PROMPT = `You are a helpful, professional support assistant for KTT (Kristian Talley), an artist who sells original drawings, illustrations, and prints.
 
 ABOUT THE ARTIST:
 - Kristian Talley is a visual artist working primarily in pen and ink, illustration, and mixed media
@@ -54,12 +57,103 @@ CONTACT:
 - Email: talleykristian@gmail.com
 - Response time: 2-3 business days
 
+TOOLS:
+You have access to tools that let you look up real-time store information. When a user asks about:
+- Specific artwork, drawings, or prints → use list_products or search_products
+- Product details or pricing → use get_product_details
+- Cart/shopping → use create_cart_session, add_to_cart, view_cart
+- Commission process → use submit_commission_inquiry or get_contact_info
+- Store information → use get_store_info or get_product_types
+
+When using tools:
+- Always call the tool to get accurate, current information
+- Never make up prices, availability, or product details
+- After getting tool results, summarize them naturally in your response
+- If a tool call fails, acknowledge the error and offer alternatives
+
 TONE:
 - Be helpful, concise, and professional
 - Match the minimal, understated aesthetic of the site
 - Keep responses brief (2-4 sentences when possible)
 - If you don't know something, say so and suggest contacting via email
 - Never make up information about specific artwork or prices not mentioned above`
+
+/**
+ * Fetch available tools from MCP server
+ */
+let cachedTools = null
+
+export async function getAvailableTools() {
+  if (cachedTools) return cachedTools
+
+  try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 5000)
+
+    const response = await fetch(MCP_TOOLS_URL, {
+      method: 'GET',
+      signal: controller.signal,
+    })
+
+    clearTimeout(timeoutId)
+
+    if (!response.ok) {
+      console.warn('[SupportBot] Failed to fetch MCP tools:', response.status)
+      cachedTools = []
+      return cachedTools
+    }
+
+    const data = await response.json()
+    cachedTools = data.tools || []
+    return cachedTools
+  } catch (error) {
+    console.warn('[SupportBot] MCP tools fetch failed:', error.message)
+    cachedTools = []
+    return cachedTools
+  }
+}
+
+/**
+ * Execute a tool call via MCP server
+ */
+async function executeToolCall(toolName, toolArgs) {
+  const MCP_BASE = import.meta.env.VITE_MCP_TOOLS_URL || `${OLLAMA_URL}/mcp`
+  const MCP_ENDPOINT = `${MCP_BASE}/store`
+
+  try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
+
+    const response = await fetch(MCP_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'tools/call',
+        id: Date.now(),
+        params: {
+          name: toolName,
+          arguments: toolArgs,
+        },
+      }),
+      signal: controller.signal,
+    })
+
+    clearTimeout(timeoutId)
+
+    if (!response.ok) {
+      throw new Error(`MCP tool error: ${response.status}`)
+    }
+
+    const data = await response.json()
+    return data.result?.content?.[0]?.text || 'Tool executed successfully'
+  } catch (error) {
+    console.error(`[SupportBot] Tool call failed for ${toolName}:`, error.message)
+    return `Sorry, I couldn't execute that tool call. Please try again or contact talleykristian@gmail.com.`
+  }
+}
 
 /**
  * Check if LLM server is available
@@ -89,40 +183,37 @@ export async function checkConnection() {
  * @returns {Promise<string>} Bot response
  */
 export async function chat(userMessage, conversationHistory = []) {
-  // Build the full prompt with conversation history
-  let prompt = SYSTEM_CONTEXT + '\n\n'
+  // Build conversation messages array
+  const messages = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    ...conversationHistory.map((msg) => ({
+      role: msg.role === 'user' ? 'user' : 'assistant',
+      content: msg.content,
+    })),
+    { role: 'user', content: userMessage },
+  ]
 
-  // Add conversation history (last 6 messages for context)
-  const recentHistory = conversationHistory.slice(-6)
-  if (recentHistory.length > 0) {
-    prompt += 'CONVERSATION HISTORY:\n'
-    recentHistory.forEach((msg) => {
-      const role = msg.role === 'user' ? 'Customer' : 'Assistant'
-      prompt += `${role}: ${msg.content}\n`
-    })
-    prompt += '\n'
-  }
-
-  prompt += `Customer: ${userMessage}\n\nAssistant:`
+  // Fetch available tools
+  const tools = await getAvailableTools()
 
   try {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
 
-    const response = await fetch(`${OLLAMA_URL}/api/generate`, {
+    const response = await fetch(`${OLLAMA_URL}/api/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         model: MODEL,
-        prompt,
+        messages,
         stream: false,
+        tools,
         options: {
-          num_predict: 200,
+          num_predict: 300,
           temperature: 0.7,
           top_p: 0.9,
-          stop: ['\n\nCustomer:', '\n\nAssistant:', 'Customer:', '\n\n'],
         },
       }),
       signal: controller.signal,
@@ -135,38 +226,66 @@ export async function chat(userMessage, conversationHistory = []) {
     }
 
     const data = await response.json()
-    const botResponse = data.response?.trim() || ''
+    const assistantMessage = data.message
 
-    // Clean up the response
-    return cleanResponse(botResponse) || getFallbackResponse(userMessage)
+    // Handle tool calls if present
+    if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
+      const toolResults = []
+
+      for (const toolCall of assistantMessage.tool_calls) {
+        const toolName = toolCall.function.name
+        const toolArgs = typeof toolCall.function.arguments === 'string'
+          ? JSON.parse(toolCall.function.arguments || '{}')
+          : toolCall.function.arguments || {}
+
+        const result = await executeToolCall(toolName, toolArgs)
+        toolResults.push({
+          role: 'tool',
+          content: result,
+          tool_call_id: toolCall.id,
+        })
+      }
+
+      // Send tool results back to get final response
+      const followUpMessages = [
+        ...messages,
+        assistantMessage,
+        ...toolResults,
+      ]
+
+      const followUpResponse = await fetch(`${OLLAMA_URL}/api/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: MODEL,
+          messages: followUpMessages,
+          stream: false,
+          tools,
+          options: {
+            num_predict: 300,
+            temperature: 0.7,
+            top_p: 0.9,
+          },
+        }),
+        signal: controller.signal,
+      })
+
+      if (!followUpResponse.ok) {
+        throw new Error(`Follow-up API error: ${followUpResponse.status}`)
+      }
+
+      const followUpData = await followUpResponse.json()
+      return followUpData.message?.content || getFallbackResponse(userMessage)
+    }
+
+    // No tool calls - return direct response
+    return assistantMessage?.content || getFallbackResponse(userMessage)
   } catch (error) {
     console.error('[SupportBot] Chat error:', error.message)
     return getFallbackResponse(userMessage)
   }
-}
-
-/**
- * Clean up the bot response
- */
-function cleanResponse(text) {
-  if (!text) return null
-
-  let cleaned = text.trim()
-
-  // Remove any leftover role prefixes
-  cleaned = cleaned.replace(/^(Assistant|Bot|Support):\s*/i, '')
-
-  // Remove quotes if the whole response is quoted
-  if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
-    cleaned = cleaned.slice(1, -1)
-  }
-
-  // Limit length
-  if (cleaned.length > 500) {
-    cleaned = cleaned.slice(0, 500) + '...'
-  }
-
-  return cleaned.length > 0 ? cleaned : null
 }
 
 /**
