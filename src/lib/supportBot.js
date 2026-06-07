@@ -199,15 +199,17 @@ export async function chat(userMessage, conversationHistory = []) {
 
         const result = await executeToolCall(toolName, toolArgs)
 
-        if (toolName === 'create_cart_session') captureSessionId(result)
-
-        // Mirror successful add-to-cart calls into the on-page cart
-        if (toolName === 'add_to_cart' && toolArgs.productHandle && /✅|added/i.test(result)) {
-          cartActions.push({
-            type: 'add',
-            handle: toolArgs.productHandle,
-            quantity: toolArgs.quantity || 1,
-          })
+        // Mirror successful add-to-cart calls into the on-page cart. The server
+        // resolves the product name to a handle and echoes it as "Handle: <x>".
+        if (toolName === 'add_to_cart') {
+          const handleMatch = result.match(/Handle:\s*(\S+)/)
+          if (handleMatch && /✅|added/i.test(result)) {
+            cartActions.push({
+              type: 'add',
+              handle: handleMatch[1],
+              quantity: toolArgs.quantity || 1,
+            })
+          }
         }
 
         messages.push({

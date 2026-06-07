@@ -177,6 +177,7 @@ export function formatAddedToCart(cart, productHandle, quantity) {
   const item = cart.items.find((i) => i.handle === productHandle)
   return `✅ Added ${quantity}x ${item.title} to cart
 Session: ${cart.id}
+Handle: ${productHandle}
 Current cart total: $${calculateTotal(cart).toFixed(2)}`
 }
 

@@ -76,7 +76,8 @@ export async function ensureCartSession() {
 async function getLineItemIds() {
   if (!cartSessionId) return []
   const text = await executeToolCall('view_cart', { sessionId: cartSessionId })
-  return [...text.matchAll(/ID:\s*(\S+)/g)].map((m) => m[1])
+  // Match only line-item "ID:" lines, not the "Session ID:" line in empty carts
+  return [...text.matchAll(/^\s*ID:\s*(\S+)/gm)].map((m) => m[1])
 }
 
 /**
