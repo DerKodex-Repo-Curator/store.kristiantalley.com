@@ -92,7 +92,8 @@ export function buildToolDefinitions() {
     },
     {
       name: 'add_to_cart',
-      description: 'Add a product to a cart session',
+      description:
+        'Add a product to a cart session. Pass the product name or title the user mentioned (e.g. "Holy Man") — an exact handle is not required; the server resolves it.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -102,7 +103,8 @@ export function buildToolDefinitions() {
           },
           productHandle: {
             type: 'string',
-            description: 'Product handle (e.g., seated-figure-i)',
+            description:
+              'Product name, title, or handle (e.g. "Holy Man" or "holy-man"). The server matches it to a product.',
           },
           quantity: {
             type: 'number',
@@ -289,13 +291,99 @@ async function handleCreateCartSession(dataStore) {
   return formatCartSession(cart)
 }
 
-async function handleAddToCart(args, dataStore) {
-  try {
-    const cart = await dataStore.addToCart(args.sessionId, args.productHandle, args.quantity || 1)
-    return formatAddedToCart(cart, args.productHandle, args.quantity || 1)
-  } catch (error) {
-    throw error
+const normalizeRef = (s) =>
+  (s || '')
+    .toLowerCase()
+    .replace(/["“”'’]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+
+/**
+ * Resolve a free-text product reference to a real handle. LLMs pass the product
+ * name ("holy man") rather than the internal slug ("holy-man"), so we match
+ * against handles and titles instead of requiring an exact handle.
+ */
+const STOPWORDS = new Set([
+  'the', 'a', 'an', 'with', 'in', 'into', 'on', 'of', 'and', 'for', 'to', 'my',
+  'me', 'please', 'one', 'piece', 'art', 'artwork', 'print', 'this', 'that', 'it',
+])
+
+async function resolveProductHandle(dataStore, ref) {
+  if (!ref) return null
+
+  // Exact handle first (covers well-behaved callers)
+  const exact = await dataStore.getProductByHandle(ref)
+  if (exact) return exact.handle
+
+  const products = await dataStore.getProducts({})
+  const q = normalizeRef(ref)
+  if (!q) return null
+
+  // Containment on handle or title
+  const direct = products.find(
+    (p) => normalizeRef(p.handle).includes(q) || normalizeRef(p.title).includes(q)
+  )
+  if (direct) return direct.handle
+
+  // Best token-overlap match against the full product text, ignoring stopwords
+  const tokens = q
+    .split(' ')
+    .filter((t) => t.length > 1 && !STOPWORDS.has(t))
+  if (tokens.length === 0) return null
+
+  let best = null
+  let bestScore = 0
+  for (const p of products) {
+    const hay = normalizeRef(
+      [p.title, p.handle, p.description, p.medium, p.productType, (p.tags || []).join(' ')]
+        .filter(Boolean)
+        .join(' ')
+    )
+    const score = tokens.reduce((sum, t) => sum + (hay.includes(t) ? 1 : 0), 0)
+    if (score > bestScore) {
+      bestScore = score
+      best = p
+    }
   }
+  return bestScore > 0 ? best.handle : null
+}
+
+/**
+ * Pick the product reference from tool args. Models are inconsistent about the
+ * key name (productHandle, item, product_name, ...), so after checking the
+ * common ones we fall back to any string value that isn't a reserved field.
+ */
+function pickProductRef(args) {
+  const known =
+    args.productHandle ||
+    args.product ||
+    args.item ||
+    args.name ||
+    args.title ||
+    args.query ||
+    args.product_name ||
+    args.productName ||
+    args.handle
+  if (known) return known
+
+  for (const [key, value] of Object.entries(args)) {
+    if (key === 'sessionId' || key === 'quantity') continue
+    if (typeof value === 'string' && value.trim()) return value
+  }
+  return null
+}
+
+async function handleAddToCart(args, dataStore) {
+  const ref = pickProductRef(args)
+  const quantity = args.quantity || 1
+
+  const handle = await resolveProductHandle(dataStore, ref)
+  if (!handle) {
+    return `I couldn't find a product matching "${ref}". Try browsing with list_products or search_products to see exact titles.`
+  }
+
+  const cart = await dataStore.addToCart(args.sessionId, handle, quantity)
+  return formatAddedToCart(cart, handle, quantity)
 }
 
 async function handleViewCart(args, dataStore) {

@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useCallback, useMemo } from 'react'
+import { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react'
 import { createCart, getProductByHandle, isShopifyConfigured } from '../lib/shopifyClient'
+import { reconcileBotCart } from '../lib/mcpCart'
 
 const CartContext = createContext(null)
 
@@ -28,6 +29,13 @@ export function CartProvider({ children }) {
   // Open/close cart drawer
   const openCart = useCallback(() => setIsOpen(true), [])
   const closeCart = useCallback(() => setIsOpen(false), [])
+
+  // Keep the bot's MCP cart session in sync with the on-page cart. Any add,
+  // remove, quantity change, or clear rewrites the MCP cart to match, so the
+  // support bot and the drawer always show the same items (two-way sync).
+  useEffect(() => {
+    reconcileBotCart(items)
+  }, [items])
 
   /**
    * Add item to cart. If item with same variant ID exists, increment quantity.
