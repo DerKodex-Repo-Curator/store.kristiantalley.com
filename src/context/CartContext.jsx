@@ -1,8 +1,11 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react'
-import { createCart, getProductByHandle, isShopifyConfigured } from '../lib/shopifyClient'
+import { getProductByHandle } from '../lib/shopifyClient'
 import { reconcileBotCart } from '../lib/mcpCart'
 
 const CartContext = createContext(null)
+
+// Server endpoint that creates a Stripe Checkout Session (see mcp-server/checkout.js)
+const CHECKOUT_URL = import.meta.env.VITE_CHECKOUT_URL || 'http://localhost:3001/checkout'
 
 /**
  * Cart provider managing cart state and Shopify checkout integration.
@@ -134,37 +137,48 @@ export function CartProvider({ children }) {
     setCheckoutUrl(null)
   }, [])
 
+  // When Stripe returns the buyer with ?checkout=success, empty the cart and
+  // clean the URL so a refresh doesn't show stale items.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('checkout') === 'success') {
+      clearCart()
+      params.delete('checkout')
+      params.delete('session_id')
+      const qs = params.toString()
+      window.history.replaceState({}, '', window.location.pathname + (qs ? `?${qs}` : ''))
+    }
+  }, [clearCart])
+
   /**
-   * Proceed to Shopify checkout. Creates a Shopify cart from the line items
-   * and redirects the browser to the hosted checkout URL.
+   * Proceed to checkout. Sends the cart (product handles + quantities) to our
+   * server, which creates a Stripe Checkout Session (looking up authoritative
+   * prices server-side), then redirects the browser to Stripe's hosted page.
    */
   const goToCheckout = useCallback(async () => {
     if (items.length === 0) return
 
-    if (!isShopifyConfigured()) {
-      alert('Checkout connects to Shopify once the store is configured.')
-      return
-    }
-
     setIsLoading(true)
 
     try {
-      const lines = items.map((item) => ({
-        merchandiseId: item.variantId,
-        quantity: item.quantity,
-      }))
+      const response = await fetch(CHECKOUT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: items.map((item) => ({ handle: item.handle, quantity: item.quantity })),
+        }),
+      })
 
-      const cart = await createCart(lines)
-
-      if (cart?.checkoutUrl) {
-        setCheckoutUrl(cart.checkoutUrl)
-        window.location.href = cart.checkoutUrl
-      } else {
-        throw new Error('No checkout URL returned from Shopify')
+      const data = await response.json()
+      if (!response.ok || !data.url) {
+        throw new Error(data.error || 'Checkout could not be started')
       }
+
+      setCheckoutUrl(data.url)
+      window.location.href = data.url
     } catch (error) {
       console.error('Checkout error:', error)
-      alert('Sorry, something went wrong starting checkout. Please try again or email talleykristian@gmail.com.')
+      alert(`Sorry, checkout couldn't start: ${error.message}. Please try again or email talleykristian@gmail.com.`)
     } finally {
       setIsLoading(false)
     }

@@ -64,6 +64,11 @@ function SupportChat() {
           await addItemByHandle(action.handle, action.quantity)
         }
       }
+
+      // If the bot started checkout, send the buyer to Stripe's hosted page
+      if (response.checkoutUrl) {
+        window.location.href = response.checkoutUrl
+      }
     } catch (error) {
       console.error('Chat error:', error)
       setMessages((prev) => [

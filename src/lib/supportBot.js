@@ -65,6 +65,7 @@ You have access to tools that let you look up real-time store information. When 
 - Specific artwork, drawings, or prints → use list_products or search_products
 - Product details or pricing → use get_product_details
 - Cart/shopping → call add_to_cart or view_cart directly (the cart session is created and tracked for you automatically; you do NOT need to ask for or pass a session ID)
+- Checkout / pay / buy / complete order → call the checkout tool. It returns a secure Stripe payment link and the buyer is taken there. NEVER ask the user for card or payment details yourself.
 - Commission process → use submit_commission_inquiry or get_contact_info
 - Store information → use get_store_info or get_product_types
 
@@ -120,7 +121,7 @@ export async function getAvailableTools() {
  * Cart tools require a sessionId. The shared mcpCart module manages a single
  * session for the page lifetime; we auto-inject it so the model needn't track IDs.
  */
-const CART_TOOLS = new Set(['add_to_cart', 'view_cart', 'remove_from_cart'])
+const CART_TOOLS = new Set(['add_to_cart', 'view_cart', 'remove_from_cart', 'checkout'])
 
 /**
  * Check if LLM server is available
@@ -170,7 +171,9 @@ export async function chat(userMessage, conversationHistory = []) {
 
   // Cart mutations the bot performs this turn, surfaced to the UI for syncing.
   const cartActions = []
-  const reply = (text) => ({ text, cartActions })
+  // If the bot starts checkout, this holds the Stripe URL for the UI to redirect to.
+  let checkoutUrl = null
+  const reply = (text) => ({ text, cartActions, checkoutUrl })
 
   try {
     for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
@@ -210,6 +213,12 @@ export async function chat(userMessage, conversationHistory = []) {
               quantity: toolArgs.quantity || 1,
             })
           }
+        }
+
+        // Capture the Stripe checkout link so the UI can redirect the buyer.
+        if (toolName === 'checkout') {
+          const urlMatch = result.match(/Checkout:\s*(\S+)/)
+          if (urlMatch) checkoutUrl = urlMatch[1]
         }
 
         messages.push({

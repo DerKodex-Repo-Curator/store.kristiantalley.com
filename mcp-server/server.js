@@ -19,6 +19,7 @@ import { createStdioTransport } from './transports/stdio.js'
 import { config } from './config.js'
 import { createDataStore } from './data/store.js'
 import { buildToolDefinitions, handleToolCall } from './tools/index.js'
+import { createCheckoutSession, handleStripeWebhook } from './checkout.js'
 
 /**
  * Parse command line arguments
@@ -180,6 +181,51 @@ async function main() {
             }
           })
 
+          return
+        }
+
+        // Stripe webhook — authoritative payment confirmation. Uses the raw
+        // request body (Buffer) because signature verification requires it.
+        if (req.method === 'POST' && req.url === '/webhook') {
+          const chunks = []
+          req.on('data', (chunk) => chunks.push(chunk))
+          req.on('end', async () => {
+            try {
+              const rawBody = Buffer.concat(chunks)
+              const result = await handleStripeWebhook(
+                rawBody,
+                req.headers['stripe-signature'],
+                dataStore
+              )
+              res.writeHead(200, { 'Content-Type': 'application/json' })
+              res.end(JSON.stringify(result))
+            } catch (error) {
+              console.error('[webhook] error:', error.message)
+              res.writeHead(400, { 'Content-Type': 'application/json' })
+              res.end(JSON.stringify({ error: error.message }))
+            }
+          })
+          return
+        }
+
+        // Stripe checkout endpoint — creates a hosted checkout session
+        if (req.method === 'POST' && req.url === '/checkout') {
+          let body = ''
+          req.on('data', (chunk) => {
+            body += chunk.toString()
+          })
+          req.on('end', async () => {
+            try {
+              const { items } = JSON.parse(body || '{}')
+              const url = await createCheckoutSession(items, dataStore)
+              res.writeHead(200, { 'Content-Type': 'application/json' })
+              res.end(JSON.stringify({ url }))
+            } catch (error) {
+              console.error('[checkout] error:', error.message)
+              res.writeHead(400, { 'Content-Type': 'application/json' })
+              res.end(JSON.stringify({ error: error.message }))
+            }
+          })
           return
         }
 

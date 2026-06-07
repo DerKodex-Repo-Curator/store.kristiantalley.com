@@ -4,6 +4,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid'
+import { createCheckoutSession } from '../checkout.js'
 import {
   formatProductList,
   formatProductDetail,
@@ -147,6 +148,18 @@ export function buildToolDefinitions() {
         required: ['sessionId', 'lineItemId'],
       },
     },
+    {
+      name: 'checkout',
+      description:
+        'Start checkout / pay for the items in the cart. Creates a secure Stripe checkout link and takes the buyer there to pay. Call this when the user wants to check out, pay, buy, or complete their order — never ask for card details yourself.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          sessionId: { type: 'string', description: 'Cart session ID' },
+        },
+        required: ['sessionId'],
+      },
+    },
 
     // Store Information
     {
@@ -239,6 +252,8 @@ export async function handleToolCall(toolName, args, dataStore) {
         return await handleViewCart(args, dataStore)
       case 'remove_from_cart':
         return await handleRemoveFromCart(args, dataStore)
+      case 'checkout':
+        return await handleCheckout(args, dataStore)
 
       // Store Information
       case 'get_store_info':
@@ -402,6 +417,20 @@ async function handleRemoveFromCart(args, dataStore) {
   } catch (error) {
     throw error
   }
+}
+
+async function handleCheckout(args, dataStore) {
+  const cart = await dataStore.getCart(args.sessionId)
+  if (!cart || cart.items.length === 0) {
+    return 'Your cart is empty — add a piece before checking out.'
+  }
+
+  const items = cart.items.map((i) => ({ handle: i.handle, quantity: i.quantity }))
+  const url = await createCheckoutSession(items, dataStore)
+
+  // The "Checkout:" line is parsed by the chat client to redirect the browser.
+  return `🧾 Your secure checkout is ready — you'll be taken to Stripe to pay.
+Checkout: ${url}`
 }
 
 // ============================================================================

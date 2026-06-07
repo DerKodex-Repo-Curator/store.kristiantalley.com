@@ -31,3 +31,7 @@ dist-ssr
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Runtime order/inquiry data (contains customer PII)
+mcp-server/data/orders.json
+mcp-server/data/inquiries.json

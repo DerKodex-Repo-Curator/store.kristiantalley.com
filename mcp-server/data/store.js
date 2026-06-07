@@ -63,6 +63,7 @@ export class JSONDataStore extends DataStore {
     this.productsPath = path.join(this.dataPath, 'products.json')
     this.cartsPath = path.join(this.dataPath, 'carts.json')
     this.inquiriesPath = path.join(this.dataPath, 'inquiries.json')
+    this.ordersPath = path.join(this.dataPath, 'orders.json')
     this.productCache = null
     this.cartCache = null
   }
@@ -275,6 +276,34 @@ export class JSONDataStore extends DataStore {
     })
     await this.saveInquiries(inquiries)
     return inquiries[inquiries.length - 1]
+  }
+
+  async loadOrders() {
+    try {
+      const data = await fs.readFile(this.ordersPath, 'utf-8')
+      return JSON.parse(data)
+    } catch (error) {
+      if (error.code === 'ENOENT') return []
+      console.error('Error loading orders.json:', error)
+      return []
+    }
+  }
+
+  async addOrder(order) {
+    const orders = await this.loadOrders()
+    // Idempotency: Stripe may deliver the same event more than once
+    if (order.sessionId && orders.some((o) => o.sessionId === order.sessionId)) {
+      return orders.find((o) => o.sessionId === order.sessionId)
+    }
+    const record = { ...order, recordedAt: new Date().toISOString() }
+    orders.push(record)
+    try {
+      await fs.writeFile(this.ordersPath, JSON.stringify(orders, null, 2), 'utf-8')
+    } catch (error) {
+      console.error('Error saving orders.json:', error)
+      throw new Error('Failed to save order')
+    }
+    return record
   }
 }
 
