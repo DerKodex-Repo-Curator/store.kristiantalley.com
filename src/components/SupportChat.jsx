@@ -1,11 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
-import { chatWithMCP, SUGGESTED_QUESTIONS } from '../lib/supportBotMCP'
-import { checkConnection } from '../lib/supportBot'
-import MCPInterface from './MCPInterface'
+import { chat, SUGGESTED_QUESTIONS, checkConnection } from '../lib/supportBot'
 
 /**
- * Support chat widget with MCP UI integration
- * Displays rich interactive components alongside text responses
+ * Support chat widget powered by LLM
+ * Connects to Ollama server for AI-powered customer support
  */
 function SupportChat() {
   const [isOpen, setIsOpen] = useState(false)
@@ -13,7 +11,6 @@ function SupportChat() {
   const [messages, setMessages] = useState([])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [mcpComponentIntent, setMcpComponentIntent] = useState(null)
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
 
@@ -48,21 +45,16 @@ function SupportChat() {
     setIsLoading(true)
 
     try {
-      // Get bot response with MCP integration
-      const response = await chatWithMCP(text, messages)
+      // Get bot response from LLM
+      const response = await chat(text, messages)
 
-      // Add text response
+      // Add bot response
       const botMessage = {
         role: 'assistant',
-        content: response.text,
-        timestamp: response.timestamp,
+        content: response,
+        timestamp: new Date().toISOString(),
       }
       setMessages((prev) => [...prev, botMessage])
-
-      // If there's a component to show, set it
-      if (response.shouldShowComponent && response.componentIntent) {
-        setMcpComponentIntent(response.componentIntent)
-      }
     } catch (error) {
       console.error('Chat error:', error)
       setMessages((prev) => [
@@ -151,78 +143,59 @@ function SupportChat() {
             </button>
           </div>
 
-          {/* MCP Component Display */}
-          {mcpComponentIntent ? (
-            <div className="flex-1 overflow-y-auto border-b border-gray-200">
-              <div className="p-2">
-                <button
-                  onClick={() => setMcpComponentIntent(null)}
-                  className="float-right text-xs text-gray-400 hover:text-gray-600 mb-2"
-                >
-                  ✕ Close
-                </button>
-                <div style={{ clear: 'both' }}>
-                  <MCPInterface initialIntent={mcpComponentIntent} />
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[200px]">
+            {messages.length === 0 ? (
+              <div className="text-center">
+                <p className="text-sm text-gray-500 mb-4">
+                  Hi! Ask me about artwork, shipping, commissions, or anything else.
+                </p>
+                <div className="space-y-2">
+                  {SUGGESTED_QUESTIONS.map((question) => (
+                    <button
+                      key={question}
+                      onClick={() => handleSuggestion(question)}
+                      className="block w-full text-left text-xs text-gray-600 hover:text-black py-2 px-3 border border-gray-200 hover:border-gray-400 transition-colors"
+                    >
+                      {question}
+                    </button>
+                  ))}
                 </div>
               </div>
-            </div>
-          ) : (
-            <>
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[200px]">
-                {messages.length === 0 ? (
-                  <div className="text-center">
-                    <p className="text-sm text-gray-500 mb-4">
-                      Hi! Ask me about artwork, shipping, commissions, or anything else.
-                    </p>
-                    <div className="space-y-2">
-                      {SUGGESTED_QUESTIONS.map((question) => (
-                        <button
-                          key={question}
-                          onClick={() => handleSuggestion(question)}
-                          className="block w-full text-left text-xs text-gray-600 hover:text-black py-2 px-3 border border-gray-200 hover:border-gray-400 transition-colors"
-                        >
-                          {question}
-                        </button>
-                      ))}
-                    </div>
+            ) : (
+              messages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[85%] text-sm px-3 py-2 ${
+                      msg.role === 'user'
+                        ? 'bg-black text-white'
+                        : 'bg-gray-100 text-black'
+                    }`}
+                  >
+                    {msg.content}
                   </div>
-                ) : (
-                  messages.map((msg, index) => (
-                    <div
-                      key={index}
-                      className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-[85%] text-sm px-3 py-2 ${
-                          msg.role === 'user'
-                            ? 'bg-black text-white'
-                            : 'bg-gray-100 text-black'
-                        }`}
-                      >
-                        {msg.content}
-                      </div>
-                    </div>
-                  ))
-                )}
+                </div>
+              ))
+            )}
 
-                {/* Loading indicator */}
-                {isLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-gray-100 text-black text-sm px-3 py-2">
-                      <span className="inline-flex gap-1">
-                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                <div ref={messagesEndRef} />
+            {/* Loading indicator */}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="bg-gray-100 text-black text-sm px-3 py-2">
+                  <span className="inline-flex gap-1">
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </span>
+                </div>
               </div>
-            </>
-          )}
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
 
           {/* Input */}
           <div className="border-t border-gray-200 p-3">

@@ -7,6 +7,13 @@ import {
   generateStoreInfo,
   generateFilterPanel,
 } from '../lib/mcpClient'
+import {
+  listProducts,
+  searchProducts,
+  getProductDetails,
+  getAvailableTags,
+  checkMcpServer,
+} from '../lib/mcpApiClient'
 
 /**
  * MCPInterface - React orchestrator for MCP UI components
@@ -29,6 +36,7 @@ function MCPInterface({ initialIntent = null }) {
   const [sessionId] = useState(() => `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`)
   const [loading, setLoading] = useState(false)
   const [cartTotal, setCartTotal] = useState(0)
+  const [mcpAvailable, setMcpAvailable] = useState(false)
 
   // Initialize view based on intent prop
   useEffect(() => {
@@ -57,6 +65,11 @@ function MCPInterface({ initialIntent = null }) {
     }
   }, [initialIntent])
 
+  // Check MCP server availability
+  useEffect(() => {
+    checkMcpServer().then(setMcpAvailable)
+  }, [])
+
   // Load products on mount
   useEffect(() => {
     loadProducts()
@@ -73,47 +86,46 @@ function MCPInterface({ initialIntent = null }) {
     setCartTotal(total)
   }, [cart])
 
-  // Simulated product loading - in real app, would call MCP tools
+  // Load products from MCP server or local data
   const loadProducts = async () => {
     setLoading(true)
     try {
-      // Mock data - would call list_products tool in production
-      const mockProducts = [
-        {
-          id: '1',
-          handle: 'seated-figure-i',
-          title: 'Seated Figure I',
-          price: 245,
-          image: 'https://via.placeholder.com/300x400?text=Seated+Figure+I',
-          type: 'Drawing',
-          tags: ['figure', 'seated', 'charcoal'],
-          available: true,
-        },
-        {
-          id: '2',
-          handle: 'standing-figure-ii',
-          title: 'Standing Figure II',
-          price: 280,
-          image: 'https://via.placeholder.com/300x400?text=Standing+Figure+II',
-          type: 'Drawing',
-          tags: ['figure', 'standing', 'graphite'],
-          available: true,
-        },
-        {
-          id: '3',
-          handle: 'portrait-study-i',
-          title: 'Portrait Study I',
-          price: 195,
-          image: 'https://via.placeholder.com/300x400?text=Portrait+Study+I',
-          type: 'Drawing',
-          tags: ['portrait', 'study', 'charcoal'],
-          available: true,
-        },
-      ]
-      setProducts(mockProducts)
-      setFilteredProducts(mockProducts)
+      const fetchedProducts = await listProducts()
+      setProducts(fetchedProducts)
+      setFilteredProducts(fetchedProducts)
     } catch (error) {
       console.error('Failed to load products:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Search products
+  const search = async (query) => {
+    setLoading(true)
+    try {
+      const results = await searchProducts(query)
+      setProducts(results)
+      setFilteredProducts(results)
+      setView('products')
+    } catch (error) {
+      console.error('Search failed:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Load product details
+  const loadProductDetails = async (handle) => {
+    setLoading(true)
+    try {
+      const product = await getProductDetails(handle)
+      if (product) {
+        setSelectedProduct(product)
+        setView('product-detail')
+      }
+    } catch (error) {
+      console.error('Failed to load product details:', error)
     } finally {
       setLoading(false)
     }

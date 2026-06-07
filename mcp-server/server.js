@@ -53,19 +53,6 @@ async function main() {
   console.error(`📡 Transport: ${config.transport}`)
   console.error(`📂 Data source: ${config.dataSource}`)
 
-  // Create MCP server
-  const server = new Server(
-    {
-      name: 'ktt-store',
-      version: '1.0.0',
-    },
-    {
-      capabilities: {
-        tools: {},
-      },
-    }
-  )
-
   // Initialize data store
   const dataStore = createDataStore()
   console.error('💾 Data store initialized')
@@ -78,56 +65,161 @@ async function main() {
   console.error('   Store Info: get_store_info, get_product_types, get_available_tags')
   console.error('   Custom Requests: submit_commission_inquiry, get_contact_info')
 
-  // Handle ListTools requests
-  server.setRequestHandler(ListToolsRequestSchema, async () => {
-    return { tools: toolDefinitions }
-  })
-
-  // Handle CallTool requests
-  server.setRequestHandler(CallToolRequestSchema, async (request) => {
-    try {
-      const result = await handleToolCall(request.params.name, request.params.arguments || {}, dataStore)
-      return {
-        content: [
-          {
-            type: 'text',
-            text: result,
-          },
-        ],
-      }
-    } catch (error) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Error: ${error.message}`,
-          },
-        ],
-        isError: true,
-      }
-    }
-  })
-
   // Set up transport
-  let transport
-
   if (config.transport === 'stdio') {
-    transport = await createStdioTransport()
+    // Create MCP server for stdio transport
+    const server = new Server(
+      {
+        name: 'ktt-store',
+        version: '1.0.0',
+      },
+      {
+        capabilities: {
+          tools: {},
+        },
+      }
+    )
+
+    // Handle ListTools requests
+    server.setRequestHandler(ListToolsRequestSchema, async () => {
+      return { tools: toolDefinitions }
+    })
+
+    // Handle CallTool requests
+    server.setRequestHandler(CallToolRequestSchema, async (request) => {
+      try {
+        const result = await handleToolCall(request.params.name, request.params.arguments || {}, dataStore)
+        return {
+          content: [
+            {
+              type: 'text',
+              text: result,
+            },
+          ],
+        }
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error: ${error.message}`,
+            },
+          ],
+          isError: true,
+        }
+      }
+    })
+
+    // Connect server to stdio transport and start
+    const transport = await createStdioTransport()
+    await server.connect(transport)
     console.error('✅ stdio transport ready for Claude Code')
+    console.error('✅ MCP Server started successfully')
+    console.error('📡 Listening for requests...')
   } else if (config.transport === 'http') {
-    console.error('⚠️  HTTP transport not yet implemented')
-    process.exit(1)
+    // For HTTP transport, handle MCP requests directly
+    import('http').then(async (http) => {
+      const server = http.createServer(async (req, res) => {
+        // CORS headers
+        res.setHeader('Access-Control-Allow-Origin', '*')
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+
+        // Handle preflight
+        if (req.method === 'OPTIONS') {
+          res.writeHead(200)
+          res.end()
+          return
+        }
+
+        // MCP endpoint
+        if (req.method === 'POST' && req.url === '/mcp/store') {
+          let body = ''
+
+          req.on('data', (chunk) => {
+            body += chunk.toString()
+          })
+
+          req.on('end', async () => {
+            try {
+              const request = JSON.parse(body)
+
+              // Extract tool name and arguments from MCP request
+              const toolName = request.params?.name
+              const toolArgs = request.params?.arguments || {}
+
+              if (!toolName) {
+                res.writeHead(400, { 'Content-Type': 'application/json' })
+                res.end(JSON.stringify({
+                  jsonrpc: '2.0',
+                  id: request.id,
+                  error: { code: -32600, message: 'Invalid request: missing tool name' }
+                }))
+                return
+              }
+
+              // Process the tool call
+              const result = await handleToolCall(toolName, toolArgs, dataStore)
+
+              // Send MCP response
+              res.writeHead(200, { 'Content-Type': 'application/json' })
+              res.end(JSON.stringify({
+                jsonrpc: '2.0',
+                id: request.id,
+                result: {
+                  content: [{ type: 'text', text: result }]
+                }
+              }))
+            } catch (error) {
+              res.writeHead(400, { 'Content-Type': 'application/json' })
+              res.end(JSON.stringify({
+                jsonrpc: '2.0',
+                id: 0,
+                error: { code: -32603, message: error.message }
+              }))
+            }
+          })
+
+          return
+        }
+
+        // MCP tools list endpoint
+        if (req.method === 'GET' && req.url === '/mcp/tools') {
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ tools: toolDefinitions }))
+          return
+        }
+
+        // Health check
+        if (req.url === '/health') {
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ status: 'healthy', transport: 'http' }))
+          return
+        }
+
+        // 404
+        res.writeHead(404, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify({ error: 'Not found' }))
+      })
+
+      server.listen(config.port, () => {
+        console.error(`✅ HTTP server listening on port ${config.port}`)
+        console.error(`📍 Endpoint: http://localhost:${config.port}/mcp/store`)
+        console.error(`📍 Tools list: http://localhost:${config.port}/mcp/tools`)
+        console.error('✅ HTTP transport ready for remote access')
+        console.error('✅ MCP Server started successfully')
+        console.error('📡 Listening for requests...')
+      })
+
+      server.on('error', (error) => {
+        console.error('❌ HTTP server error:', error)
+        process.exit(1)
+      })
+    })
   } else {
     console.error(`❌ Unknown transport: ${config.transport}`)
     process.exit(1)
   }
-
-  // Connect server to transport and start
-  await server.connect(transport)
-  console.error('✅ MCP Server started successfully')
-
-  // Keep the server running
-  console.error('📡 Listening for requests...')
 }
 
 main().catch((error) => {
