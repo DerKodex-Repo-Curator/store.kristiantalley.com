@@ -12,12 +12,21 @@ function ShopPage() {
 
   const activeFilter = searchParams.get('type') || 'all'
 
-  const productTypes = [
-    { value: 'all', label: 'All' },
-    { value: 'Drawing', label: 'Drawings' },
-    { value: 'Illustration', label: 'Illustrations' },
-    { value: 'Print', label: 'Prints' },
-  ]
+  // Derive filters from the actual products so new categories appear automatically
+  const productTypes = useMemo(() => {
+    const labels = {
+      Drawing: 'Drawings',
+      Illustration: 'Illustrations',
+      Painting: 'Paintings',
+      Sculpture: 'Sculpture',
+      Print: 'Prints',
+    }
+    const present = [...new Set(products.map((p) => p.productType).filter(Boolean))]
+    return [
+      { value: 'all', label: 'All' },
+      ...present.map((type) => ({ value: type, label: labels[type] || type })),
+    ]
+  }, [products])
 
   useEffect(() => {
     async function loadProducts() {

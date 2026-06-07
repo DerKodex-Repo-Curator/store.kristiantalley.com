@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useMemo } from 'react'
+import { createCart, getProductByHandle, isShopifyConfigured } from '../lib/shopifyClient'
 
 const CartContext = createContext(null)
 
@@ -67,10 +68,32 @@ export function CartProvider({ children }) {
 
     // Open cart drawer after adding
     setIsOpen(true)
-
-    // TODO: In production, sync with Shopify cart API
-    // shopifyClient.addToCart(variant.id, quantity)
   }, [])
+
+  /**
+   * Add an item to the cart by product handle. Resolves the product (and its
+   * first/default variant) via the Shopify client, then delegates to addItem.
+   * Used by the support bot bridge so "add X to cart" in chat mirrors here.
+   * @returns {Promise<boolean>} whether the item was added
+   */
+  const addItemByHandle = useCallback(
+    async (handle, quantity = 1) => {
+      try {
+        const product = await getProductByHandle(handle)
+        const variant = product?.variants?.[0]
+        if (!product || !variant) {
+          console.warn(`[Cart] Could not resolve product for handle: ${handle}`)
+          return false
+        }
+        addItem(product, variant, quantity)
+        return true
+      } catch (error) {
+        console.error(`[Cart] addItemByHandle failed for ${handle}:`, error.message)
+        return false
+      }
+    },
+    [addItem]
+  )
 
   /**
    * Remove item from cart by its line item ID.
@@ -104,24 +127,36 @@ export function CartProvider({ children }) {
   }, [])
 
   /**
-   * Proceed to Shopify checkout.
-   * In production, this creates a checkout via Shopify API and redirects.
+   * Proceed to Shopify checkout. Creates a Shopify cart from the line items
+   * and redirects the browser to the hosted checkout URL.
    */
   const goToCheckout = useCallback(async () => {
     if (items.length === 0) return
 
+    if (!isShopifyConfigured()) {
+      alert('Checkout connects to Shopify once the store is configured.')
+      return
+    }
+
     setIsLoading(true)
 
     try {
-      // TODO: In production, create Shopify checkout and get URL
-      // const checkout = await shopifyClient.createCheckout(items)
-      // window.location.href = checkout.webUrl
+      const lines = items.map((item) => ({
+        merchandiseId: item.variantId,
+        quantity: item.quantity,
+      }))
 
-      // For now, log and show placeholder behavior
-      console.log('Proceeding to checkout with items:', items)
-      alert('Checkout functionality will connect to Shopify when configured.')
+      const cart = await createCart(lines)
+
+      if (cart?.checkoutUrl) {
+        setCheckoutUrl(cart.checkoutUrl)
+        window.location.href = cart.checkoutUrl
+      } else {
+        throw new Error('No checkout URL returned from Shopify')
+      }
     } catch (error) {
       console.error('Checkout error:', error)
+      alert('Sorry, something went wrong starting checkout. Please try again or email talleykristian@gmail.com.')
     } finally {
       setIsLoading(false)
     }
@@ -138,6 +173,7 @@ export function CartProvider({ children }) {
       openCart,
       closeCart,
       addItem,
+      addItemByHandle,
       removeItem,
       updateQuantity,
       clearCart,
@@ -153,6 +189,7 @@ export function CartProvider({ children }) {
       openCart,
       closeCart,
       addItem,
+      addItemByHandle,
       removeItem,
       updateQuantity,
       clearCart,
