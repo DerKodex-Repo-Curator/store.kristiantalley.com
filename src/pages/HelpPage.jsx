@@ -31,7 +31,7 @@ function HelpPage() {
 
     try {
       const response = await chat(text, messages)
-      const botMessage = { role: 'assistant', content: response }
+      const botMessage = { role: 'assistant', content: response.text }
       setMessages((prev) => [...prev, botMessage])
     } catch (error) {
       console.error('Chat error:', error)

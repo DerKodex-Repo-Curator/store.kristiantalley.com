@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { chat, SUGGESTED_QUESTIONS, checkConnection } from '../lib/supportBot'
+import { useCart } from '../context/CartContext'
 
 /**
  * Support chat widget powered by LLM
@@ -13,6 +14,7 @@ function SupportChat() {
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
+  const { addItemByHandle } = useCart()
 
   // Check LLM connection on mount
   useEffect(() => {
@@ -51,10 +53,17 @@ function SupportChat() {
       // Add bot response
       const botMessage = {
         role: 'assistant',
-        content: response,
+        content: response.text,
         timestamp: new Date().toISOString(),
       }
       setMessages((prev) => [...prev, botMessage])
+
+      // Mirror any cart additions the bot made into the on-page cart
+      for (const action of response.cartActions || []) {
+        if (action.type === 'add') {
+          await addItemByHandle(action.handle, action.quantity)
+        }
+      }
     } catch (error) {
       console.error('Chat error:', error)
       setMessages((prev) => [

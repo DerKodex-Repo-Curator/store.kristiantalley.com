@@ -1,10 +1,10 @@
 [
   {
     "id": "gid://shopify/Product/1",
-    "title": "Seated Figure I",
-    "handle": "seated-figure-i",
-    "description": "Expressive pen and ink drawing exploring weight and presence. Dense crosshatching builds form and shadow.",
-    "productType": "Drawing",
+    "title": "\"And if I weren’t welcome–\"",
+    "handle": "and-if-i-werent-welcome",
+    "description": "Part of a four-panel pen-and-ink narrative series. Expressive figure work in dense linework.",
+    "productType": "Illustration",
     "tags": [
       "original",
       "ink",
@@ -13,177 +13,37 @@
     "price": "450",
     "currency": "USD",
     "image": "https://kristiantalley.com/tumblr/a9ff8c69debdccb5e12eaf4bb6b651368deefab0.jpg",
-    "imageAlt": "Pen and ink figure drawing",
+    "imageAlt": "And if I weren’t welcome–",
     "available": true,
     "dimensions": "9\" x 12\"",
     "medium": "Pen and ink on paper",
-    "year": "2024"
+    "year": "2016"
   },
   {
     "id": "gid://shopify/Product/2",
-    "title": "Her",
-    "handle": "her",
-    "description": "Mixed media portrait exploring texture and emotion through layered linework.",
-    "productType": "Illustration",
-    "tags": [
-      "original",
-      "mixed-media",
-      "portrait"
-    ],
-    "price": "650",
-    "currency": "USD",
-    "image": "https://kristiantalley.com/tumblr/571950118f110673e40acc9b1c4ded5310d5cc5b.jpg",
-    "imageAlt": "Mixed media portrait illustration",
-    "available": true,
-    "dimensions": "11\" x 14\"",
-    "medium": "Ink and watercolor",
-    "year": "2024"
-  },
-  {
-    "id": "gid://shopify/Product/3",
-    "title": "Wave Form",
-    "handle": "wave-form",
-    "description": "Abstract organic forms rendered in bold black ink. Swirling lines suggest movement and natural forces.",
-    "productType": "Illustration",
-    "tags": [
-      "original",
-      "ink",
-      "abstract"
-    ],
-    "price": "550",
-    "currency": "USD",
-    "image": "https://kristiantalley.com/tumblr/cb59c617ea26a21062667b56325fe080ddb69c0c.jpg",
-    "imageAlt": "Abstract wave illustration",
-    "available": true,
-    "dimensions": "8\" x 10\"",
-    "medium": "India ink on paper",
-    "year": "2023"
-  },
-  {
-    "id": "gid://shopify/Product/4",
-    "title": "Standing Figure",
-    "handle": "standing-figure",
-    "description": "Detailed pen work depicting solitude and contemplation. The figure rendered in fine crosshatching.",
+    "title": "Track Pants",
+    "handle": "track-pants",
+    "description": "Ink-on-paper study of a seated figure, rendered in confident line.",
     "productType": "Drawing",
     "tags": [
       "original",
       "ink",
       "figurative"
-    ],
-    "price": "400",
-    "currency": "USD",
-    "image": "https://kristiantalley.com/tumblr/7684220b92e91abf215949763f2244c2f4d82215.jpg",
-    "imageAlt": "Standing figure pen drawing",
-    "available": true,
-    "dimensions": "9\" x 12\"",
-    "medium": "Pen and ink on toned paper",
-    "year": "2024"
-  },
-  {
-    "id": "gid://shopify/Product/5",
-    "title": "Organic Study I",
-    "handle": "organic-study-i",
-    "description": "Intricate observation of organic form. Delicate linework captures the complexity of natural architecture.",
-    "productType": "Drawing",
-    "tags": [
-      "original",
-      "ink",
-      "nature"
     ],
     "price": "350",
     "currency": "USD",
     "image": "https://kristiantalley.com/tumblr/9d71d77c38d29bd1e04b774aecdbc2c94a41542b.jpg",
-    "imageAlt": "Organic form study in ink",
-    "available": true,
-    "dimensions": "8\" x 8\"",
-    "medium": "Ink on paper",
-    "year": "2023"
-  },
-  {
-    "id": "gid://shopify/Product/6",
-    "title": "Contemplation",
-    "handle": "contemplation",
-    "description": "Figure study exploring interior states through expressive mark-making.",
-    "productType": "Drawing",
-    "tags": [
-      "original",
-      "ink",
-      "figurative"
-    ],
-    "price": "500",
-    "currency": "USD",
-    "image": "https://kristiantalley.com/tumblr/c41b68c2ba60060a3dc969c7c70e1f988968c0b8.jpg",
-    "imageAlt": "Contemplative figure drawing",
-    "available": true,
-    "dimensions": "11\" x 14\"",
-    "medium": "Pen and ink",
-    "year": "2024"
-  },
-  {
-    "id": "gid://shopify/Product/7",
-    "title": "Study in Motion",
-    "handle": "study-in-motion",
-    "description": "Dynamic figure capturing movement and gesture through fluid linework.",
-    "productType": "Illustration",
-    "tags": [
-      "original",
-      "ink",
-      "figurative"
-    ],
-    "price": "425",
-    "currency": "USD",
-    "image": "https://kristiantalley.com/tumblr/9bc0e91025aa7c2d3287185e62d31af92c76d5ce.jpg",
-    "imageAlt": "Figure in motion study",
+    "imageAlt": "Track Pants",
     "available": true,
     "dimensions": "9\" x 12\"",
-    "medium": "India ink on paper",
-    "year": "2023"
-  },
-  {
-    "id": "gid://shopify/Product/8",
-    "title": "Threshold",
-    "handle": "threshold",
-    "description": "A figure at a doorway, caught between spaces. Heavy crosshatching creates depth and atmosphere.",
-    "productType": "Drawing",
-    "tags": [
-      "original",
-      "ink",
-      "figurative"
-    ],
-    "price": "475",
-    "currency": "USD",
-    "image": "https://kristiantalley.com/tumblr/10fdd635b26fdd47aad05e9b2911328464b52849.jpg",
-    "imageAlt": "Figure at threshold",
-    "available": false,
-    "dimensions": "9\" x 12\"",
-    "medium": "Pen and ink on toned paper",
-    "year": "2023"
-  },
-  {
-    "id": "gid://shopify/Product/9",
-    "title": "Forest Edge",
-    "handle": "forest-edge",
-    "description": "Landscape study capturing the boundary between light and shadow in dense woodland.",
-    "productType": "Drawing",
-    "tags": [
-      "original",
-      "ink",
-      "landscape"
-    ],
-    "price": "375",
-    "currency": "USD",
-    "image": "https://kristiantalley.com/tumblr/efc7ca5f0cb9a147f371370cf7121c779398d909.jpg",
-    "imageAlt": "Forest landscape drawing",
-    "available": true,
-    "dimensions": "8\" x 10\"",
     "medium": "Ink on paper",
-    "year": "2024"
+    "year": "2016"
   },
   {
-    "id": "gid://shopify/Product/10",
-    "title": "Untitled Figure",
-    "handle": "untitled-figure",
-    "description": "Raw, expressive figure study. Gestural marks capture emotional weight.",
+    "id": "gid://shopify/Product/3",
+    "title": "Cynicism",
+    "handle": "cynicism",
+    "description": "Bold ink-on-paper figure study.",
     "productType": "Drawing",
     "tags": [
       "original",
@@ -192,212 +52,352 @@
     ],
     "price": "400",
     "currency": "USD",
-    "image": "https://kristiantalley.com/tumblr/fe7f53057f2c466902f36b0d966c6b20a49f569f.jpg",
-    "imageAlt": "Untitled figure drawing",
+    "image": "https://kristiantalley.com/tumblr/9bc0e91025aa7c2d3287185e62d31af92c76d5ce.jpg",
+    "imageAlt": "Cynicism",
     "available": true,
     "dimensions": "9\" x 12\"",
-    "medium": "Pen and ink",
-    "year": "2024"
+    "medium": "Ink on paper",
+    "year": "2016"
   },
   {
-    "id": "gid://shopify/Product/11",
-    "title": "Interior I",
-    "handle": "interior-i",
-    "description": "Intimate interior scene rendered in detailed linework.",
-    "productType": "Drawing",
+    "id": "gid://shopify/Product/4",
+    "title": "\"Masks\" Album Cover",
+    "handle": "masks-album-cover",
+    "description": "Original ink illustration created as an album cover design.",
+    "productType": "Illustration",
     "tags": [
       "original",
       "ink",
-      "interior"
+      "illustration"
     ],
-    "price": "525",
+    "price": "550",
     "currency": "USD",
-    "image": "https://kristiantalley.com/tumblr/8d3d29b39cabd65fd10666d106812f4692d6d4ac.jpg",
-    "imageAlt": "Interior scene drawing",
+    "image": "https://kristiantalley.com/tumblr/tumblr_p7xub15DW11qfchfvo1_1280.jpg",
+    "imageAlt": "Masks Album Cover",
     "available": true,
     "dimensions": "11\" x 14\"",
-    "medium": "Pen and ink on paper",
-    "year": "2023"
-  },
-  {
-    "id": "gid://shopify/Product/12",
-    "title": "Texture Study",
-    "handle": "texture-study",
-    "description": "Close observation of organic texture and form.",
-    "productType": "Drawing",
-    "tags": [
-      "original",
-      "ink",
-      "nature"
-    ],
-    "price": "300",
-    "currency": "USD",
-    "image": "https://kristiantalley.com/tumblr/c0d44b570ceea3a0ad1b147b779e2f06c085458e.jpg",
-    "imageAlt": "Texture study in ink",
-    "available": true,
-    "dimensions": "6\" x 8\"",
     "medium": "Ink on paper",
-    "year": "2024"
+    "year": "2016"
   },
   {
-    "id": "gid://shopify/Product/13",
-    "title": "Nest",
-    "handle": "nest",
-    "description": "Intricate study of natural architecture. Fine linework builds complex form.",
+    "id": "gid://shopify/Product/5",
+    "title": "\"Holy Man\"",
+    "handle": "holy-man",
+    "description": "Intimate ink drawing worked directly on a manila envelope.",
     "productType": "Drawing",
     "tags": [
       "original",
       "ink",
-      "nature"
+      "figurative"
     ],
-    "price": "350",
+    "price": "375",
     "currency": "USD",
-    "image": "https://kristiantalley.com/tumblr/356a448e67f53798897db0eab8bad5c1ce46578f.jpg",
-    "imageAlt": "Nest study in ink",
+    "image": "https://kristiantalley.com/tumblr/tumblr_p7xt018g491qfchfvo1_640.jpg",
+    "imageAlt": "Holy Man",
     "available": true,
-    "dimensions": "5\" x 5\"",
-    "medium": "Pen and ink",
-    "year": "2023"
+    "dimensions": "9\" x 12\"",
+    "medium": "Ink on manila envelope",
+    "year": "2016"
   },
   {
-    "id": "gid://shopify/Product/14",
-    "title": "Digital Composition I",
-    "handle": "digital-composition-i",
-    "description": "Limited edition print of digital artwork. Bold colors and flowing forms.",
-    "productType": "Print",
+    "id": "gid://shopify/Product/6",
+    "title": "\"I Myself Am Made Entirely of Flaws\"",
+    "handle": "made-entirely-of-flaws",
+    "description": "Text-and-image ink piece on cardstock exploring self and intention.",
+    "productType": "Drawing",
+    "tags": [
+      "original",
+      "ink",
+      "text"
+    ],
+    "price": "425",
+    "currency": "USD",
+    "image": "https://kristiantalley.com/tumblr/tumblr_oj3h8bo0qF1qfchfvo1_1280.jpg",
+    "imageAlt": "I Myself Am Made Entirely of Flaws",
+    "available": true,
+    "dimensions": "8\" x 10\"",
+    "medium": "Ink on cardstock",
+    "year": "2016"
+  },
+  {
+    "id": "gid://shopify/Product/7",
+    "title": "Black Star White Sky",
+    "handle": "black-star-white-sky",
+    "description": "Graphite and ink on toned paper, balancing light and shadow.",
+    "productType": "Drawing",
+    "tags": [
+      "original",
+      "ink",
+      "graphite"
+    ],
+    "price": "500",
+    "currency": "USD",
+    "image": "https://kristiantalley.com/tumblr/tumblr_oj3hd4twZJ1qfchfvo1_1280.jpg",
+    "imageAlt": "Black Star White Sky",
+    "available": true,
+    "dimensions": "11\" x 14\"",
+    "medium": "Graphite and ink on toned paper",
+    "year": "2016"
+  },
+  {
+    "id": "gid://shopify/Product/8",
+    "title": "Ego",
+    "handle": "ego",
+    "description": "Expressive ink-on-paper figure study.",
+    "productType": "Drawing",
+    "tags": [
+      "original",
+      "ink",
+      "figurative"
+    ],
+    "price": "400",
+    "currency": "USD",
+    "image": "https://kristiantalley.com/tumblr/tumblr_o6buie7FKx1qfchfvo1_1280.jpg",
+    "imageAlt": "Ego",
+    "available": true,
+    "dimensions": "9\" x 12\"",
+    "medium": "Ink on paper",
+    "year": "2015"
+  },
+  {
+    "id": "gid://shopify/Product/9",
+    "title": "\"Entity\"",
+    "handle": "entity",
+    "description": "Digital painting, offered as an archival giclée print.",
+    "productType": "Painting",
     "tags": [
       "print",
       "digital",
       "limited-edition"
     ],
-    "price": "150",
+    "price": "250",
     "currency": "USD",
-    "image": "https://kristiantalley.com/tumblr/tumblr_p7xub15DW11qfchfvo1_1280.jpg",
-    "imageAlt": "Digital art print",
+    "image": "https://kristiantalley.com/tumblr/tumblr_p7xsibd5Je1qfchfvo1_1280.jpg",
+    "imageAlt": "Entity",
     "available": true,
-    "dimensions": "12\" x 16\"",
-    "medium": "Giclée print on archival paper",
-    "year": "2024",
-    "editionSize": "25"
+    "dimensions": "Giclée print, 12\" x 16\"",
+    "medium": "Digital",
+    "year": "2017"
+  },
+  {
+    "id": "gid://shopify/Product/10",
+    "title": "\"Hade’s Game\"",
+    "handle": "hades-game",
+    "description": "Oil painting on panel.",
+    "productType": "Painting",
+    "tags": [
+      "original",
+      "painting",
+      "oil"
+    ],
+    "price": "650",
+    "currency": "USD",
+    "image": "https://kristiantalley.com/tumblr/tumblr_nfc218WzgY1qfchfvo1_1280.jpg",
+    "imageAlt": "Hade’s Game",
+    "available": true,
+    "dimensions": "16\" x 20\"",
+    "medium": "Oil on panel",
+    "year": "2014"
+  },
+  {
+    "id": "gid://shopify/Product/11",
+    "title": "\"Caulfield\"",
+    "handle": "caulfield",
+    "description": "Acrylic painting on panel.",
+    "productType": "Painting",
+    "tags": [
+      "original",
+      "painting",
+      "acrylic"
+    ],
+    "price": "600",
+    "currency": "USD",
+    "image": "https://kristiantalley.com/tumblr/tumblr_na4ehzqr7B1qfchfvo1_1280.jpg",
+    "imageAlt": "Caulfield",
+    "available": true,
+    "dimensions": "16\" x 20\"",
+    "medium": "Acrylic on panel",
+    "year": "2015"
+  },
+  {
+    "id": "gid://shopify/Product/12",
+    "title": "Happier Times",
+    "handle": "happier-times",
+    "description": "Watercolor and pen on paper.",
+    "productType": "Painting",
+    "tags": [
+      "original",
+      "watercolor",
+      "ink"
+    ],
+    "price": "375",
+    "currency": "USD",
+    "image": "https://kristiantalley.com/tumblr/tumblr_nce3mwJvEc1qfchfvo1_r1_1280.jpg",
+    "imageAlt": "Happier Times",
+    "available": true,
+    "dimensions": "9\" x 12\"",
+    "medium": "Watercolor and pen on paper",
+    "year": "2013"
+  },
+  {
+    "id": "gid://shopify/Product/13",
+    "title": "\"Damascus\"",
+    "handle": "damascus",
+    "description": "Large-scale acrylic painting on panel, roughly four by five-and-a-half feet.",
+    "productType": "Painting",
+    "tags": [
+      "original",
+      "painting",
+      "acrylic",
+      "large"
+    ],
+    "price": "650",
+    "currency": "USD",
+    "image": "https://kristiantalley.com/tumblr/tumblr_n2f1ajiBYu1qfchfvo1_r1_1280.jpg",
+    "imageAlt": "Damascus",
+    "available": true,
+    "dimensions": "48\" x 66\"",
+    "medium": "Acrylic on panel",
+    "year": "2014"
+  },
+  {
+    "id": "gid://shopify/Product/14",
+    "title": "\"Telluric\"",
+    "handle": "telluric",
+    "description": "Cast bronze sculpture.",
+    "productType": "Sculpture",
+    "tags": [
+      "original",
+      "sculpture",
+      "bronze"
+    ],
+    "price": "650",
+    "currency": "USD",
+    "image": "https://kristiantalley.com/tumblr/tumblr_p7xtt86my71qfchfvo1_1280.jpg",
+    "imageAlt": "Telluric",
+    "available": true,
+    "dimensions": "Bronze",
+    "medium": "Cast bronze",
+    "year": "2017"
   },
   {
     "id": "gid://shopify/Product/15",
-    "title": "Figure Study II",
-    "handle": "figure-study-ii",
-    "description": "Expressive figure rendered with bold, confident strokes.",
-    "productType": "Drawing",
+    "title": "Full Circle",
+    "handle": "full-circle",
+    "description": "Cast bronze sculpture incorporating a human tooth.",
+    "productType": "Sculpture",
     "tags": [
       "original",
-      "ink",
-      "figurative"
+      "sculpture",
+      "bronze"
     ],
-    "price": "475",
+    "price": "600",
     "currency": "USD",
-    "image": "https://kristiantalley.com/tumblr/tumblr_p7xu93Py5V1qfchfvo1_1280.jpg",
-    "imageAlt": "Figure study drawing",
+    "image": "https://kristiantalley.com/tumblr/tumblr_o1jy9uxD3O1qfchfvo1_r1_1280.jpg",
+    "imageAlt": "Full Circle",
     "available": true,
-    "dimensions": "9\" x 12\"",
-    "medium": "India ink on paper",
-    "year": "2024"
+    "dimensions": "Bronze",
+    "medium": "Cast bronze with human tooth",
+    "year": "2015"
   },
   {
     "id": "gid://shopify/Product/16",
-    "title": "Botanical Study",
-    "handle": "botanical-study",
-    "description": "Detailed botanical observation with fine linework.",
-    "productType": "Drawing",
+    "title": "Pride",
+    "handle": "pride",
+    "description": "Cast bronze sculpture.",
+    "productType": "Sculpture",
     "tags": [
       "original",
-      "ink",
-      "botanical"
-    ],
-    "price": "325",
-    "currency": "USD",
-    "image": "https://kristiantalley.com/tumblr/tumblr_p7xsyvetbj1qfchfvo1_r1_1280.jpg",
-    "imageAlt": "Botanical ink drawing",
-    "available": true,
-    "dimensions": "8\" x 10\"",
-    "medium": "Pen and ink on paper",
-    "year": "2023"
-  },
-  {
-    "id": "gid://shopify/Product/17",
-    "title": "Portrait Study",
-    "handle": "portrait-study",
-    "description": "Intimate portrait rendered with expressive mark-making.",
-    "productType": "Drawing",
-    "tags": [
-      "original",
-      "ink",
-      "portrait"
+      "sculpture",
+      "bronze"
     ],
     "price": "550",
     "currency": "USD",
-    "image": "https://kristiantalley.com/tumblr/tumblr_oj3hd4twZJ1qfchfvo1_1280.jpg",
-    "imageAlt": "Portrait study in ink",
-    "available": false,
-    "dimensions": "11\" x 14\"",
-    "medium": "Pen and ink",
-    "year": "2022"
+    "image": "https://kristiantalley.com/tumblr/tumblr_o07jutp8iO1qfchfvo1_1280.jpg",
+    "imageAlt": "Pride",
+    "available": true,
+    "dimensions": "Bronze",
+    "medium": "Cast bronze",
+    "year": "2015"
+  },
+  {
+    "id": "gid://shopify/Product/17",
+    "title": "Reconciliation",
+    "handle": "reconciliation",
+    "description": "Cast bronze sculpture mounted on a walnut base.",
+    "productType": "Sculpture",
+    "tags": [
+      "original",
+      "sculpture",
+      "bronze"
+    ],
+    "price": "575",
+    "currency": "USD",
+    "image": "https://kristiantalley.com/tumblr/tumblr_ngn048pkZr1qfchfvo1_r1_1280.jpg",
+    "imageAlt": "Reconciliation",
+    "available": true,
+    "dimensions": "Bronze on walnut base",
+    "medium": "Cast bronze on walnut base",
+    "year": "2014"
   },
   {
     "id": "gid://shopify/Product/18",
-    "title": "Landscape Fragment",
-    "handle": "landscape-fragment",
-    "description": "Abstract landscape exploring form and atmosphere.",
-    "productType": "Illustration",
+    "title": "Love in the Time of Cholera",
+    "handle": "love-in-the-time-of-cholera",
+    "description": "Copper etching, first state. Limited edition.",
+    "productType": "Print",
     "tags": [
-      "original",
-      "ink",
-      "landscape"
-    ],
-    "price": "400",
-    "currency": "USD",
-    "image": "https://kristiantalley.com/tumblr/tumblr_lnc615B31s1qfchfvo1_1280.jpg",
-    "imageAlt": "Abstract landscape illustration",
-    "available": true,
-    "dimensions": "9\" x 12\"",
-    "medium": "Ink and wash",
-    "year": "2023"
-  },
-  {
-    "id": "gid://shopify/Product/19",
-    "title": "Seated Figure II",
-    "handle": "seated-figure-ii",
-    "description": "Second in series of seated figure studies.",
-    "productType": "Drawing",
-    "tags": [
-      "original",
-      "ink",
-      "figurative"
-    ],
-    "price": "450",
-    "currency": "USD",
-    "image": "https://kristiantalley.com/tumblr/tumblr_ljcxkmw5Kt1qfchfvo1_1280.jpg",
-    "imageAlt": "Seated figure drawing",
-    "available": true,
-    "dimensions": "9\" x 12\"",
-    "medium": "Pen and ink on toned paper",
-    "year": "2024"
-  },
-  {
-    "id": "gid://shopify/Product/20",
-    "title": "Tree Study",
-    "handle": "tree-study",
-    "description": "Detailed observation of bark texture and organic form.",
-    "productType": "Drawing",
-    "tags": [
-      "original",
-      "ink",
-      "nature"
+      "print",
+      "etching",
+      "limited-edition"
     ],
     "price": "300",
     "currency": "USD",
-    "image": "https://kristiantalley.com/tumblr/tumblr_lmcfcfnDb51qfchfvo1_1280.jpg",
-    "imageAlt": "Tree bark study",
+    "image": "https://kristiantalley.com/tumblr/tumblr_noxxuoKOyR1qfchfvo1_1280.jpg",
+    "imageAlt": "Love in the Time of Cholera",
     "available": true,
-    "dimensions": "6\" x 8\"",
-    "medium": "Pen on paper",
-    "year": "2024"
+    "dimensions": "9\" x 12\"",
+    "medium": "Copper etching",
+    "year": "2015"
+  },
+  {
+    "id": "gid://shopify/Product/19",
+    "title": "Seraph",
+    "handle": "seraph",
+    "description": "Multi-block linocut print.",
+    "productType": "Print",
+    "tags": [
+      "print",
+      "linocut",
+      "limited-edition"
+    ],
+    "price": "325",
+    "currency": "USD",
+    "image": "https://kristiantalley.com/tumblr/tumblr_nf0zcuecWj1qfchfvo1_1280.jpg",
+    "imageAlt": "Seraph",
+    "available": true,
+    "dimensions": "11\" x 14\"",
+    "medium": "Multi-block linocut",
+    "year": "2014"
+  },
+  {
+    "id": "gid://shopify/Product/20",
+    "title": "Star Eater",
+    "handle": "star-eater",
+    "description": "Two-layer silkscreen on felt fabric. Limited edition.",
+    "productType": "Print",
+    "tags": [
+      "print",
+      "screenprint",
+      "limited-edition"
+    ],
+    "price": "275",
+    "currency": "USD",
+    "image": "https://kristiantalley.com/tumblr/tumblr_netlg81UUH1qfchfvo1_1280.jpg",
+    "imageAlt": "Star Eater",
+    "available": true,
+    "dimensions": "12\" x 16\"",
+    "medium": "Two-layer silkscreen on felt",
+    "year": "2014"
   }
 ]

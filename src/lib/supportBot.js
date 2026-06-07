@@ -4,6 +4,8 @@
  * Uses Qwen 3.6 with tool calling capabilities
  */
 
+import { executeToolCall, ensureCartSession } from './mcpCart'
+
 const OLLAMA_URL = import.meta.env.VITE_OLLAMA_URL || 'https://YOUR_MCP_DOMAIN'
 const MODEL = import.meta.env.VITE_MODEL || 'qwen36-opus:latest'
 const MCP_BASE = import.meta.env.VITE_MCP_TOOLS_URL || `${OLLAMA_URL}/mcp`
@@ -24,12 +26,13 @@ ABOUT THE ARTIST:
 - Portfolio available at kristiantalley.com
 
 PRODUCTS AVAILABLE:
-- Original drawings (pen and ink, typically $300-$650)
-- Illustrations (mixed media, typically $350-$650)
-- Limited edition prints (giclée on archival paper, typically $150-$250)
+- Original drawings & illustrations (pen and ink, graphite, typically $350-$550)
+- Paintings (oil and acrylic on panel, watercolor; typically $375-$650)
+- Sculpture (cast bronze; typically $550-$650)
+- Limited edition prints (etching, linocut, silkscreen; typically $275-$325)
 - Most originals are one-of-a-kind pieces
-- Dimensions vary, typically 5"x5" to 11"x14"
-- Mediums include: pen and ink, India ink, ink and watercolor, ink and wash
+- Dimensions vary, from small studies up to large 48"x66" panels
+- Always look up exact titles, prices, and availability with the tools below
 
 SHIPPING & HANDLING:
 - Free shipping on orders over $200
@@ -61,7 +64,7 @@ TOOLS:
 You have access to tools that let you look up real-time store information. When a user asks about:
 - Specific artwork, drawings, or prints → use list_products or search_products
 - Product details or pricing → use get_product_details
-- Cart/shopping → use create_cart_session, add_to_cart, view_cart
+- Cart/shopping → call add_to_cart or view_cart directly (the cart session is created and tracked for you automatically; you do NOT need to ask for or pass a session ID)
 - Commission process → use submit_commission_inquiry or get_contact_info
 - Store information → use get_store_info or get_product_types
 
@@ -114,46 +117,10 @@ export async function getAvailableTools() {
 }
 
 /**
- * Execute a tool call via MCP server
+ * Cart tools require a sessionId. The shared mcpCart module manages a single
+ * session for the page lifetime; we auto-inject it so the model needn't track IDs.
  */
-async function executeToolCall(toolName, toolArgs) {
-  const MCP_BASE = import.meta.env.VITE_MCP_TOOLS_URL || `${OLLAMA_URL}/mcp`
-  const MCP_ENDPOINT = `${MCP_BASE}/store`
-
-  try {
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
-
-    const response = await fetch(MCP_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        method: 'tools/call',
-        id: Date.now(),
-        params: {
-          name: toolName,
-          arguments: toolArgs,
-        },
-      }),
-      signal: controller.signal,
-    })
-
-    clearTimeout(timeoutId)
-
-    if (!response.ok) {
-      throw new Error(`MCP tool error: ${response.status}`)
-    }
-
-    const data = await response.json()
-    return data.result?.content?.[0]?.text || 'Tool executed successfully'
-  } catch (error) {
-    console.error(`[SupportBot] Tool call failed for ${toolName}:`, error.message)
-    return `Sorry, I couldn't execute that tool call. Please try again or contact talleykristian@gmail.com.`
-  }
-}
+const CART_TOOLS = new Set(['add_to_cart', 'view_cart', 'remove_from_cart'])
 
 /**
  * Check if LLM server is available
@@ -177,10 +144,11 @@ export async function checkConnection() {
 }
 
 /**
- * Send a message to the support bot and get a response
+ * Send a message to the support bot and get a response.
  * @param {string} userMessage - The user's question
  * @param {Array} conversationHistory - Previous messages for context
- * @returns {Promise<string>} Bot response
+ * @returns {Promise<{text: string, cartActions: Array}>} Bot response text plus
+ *   any cart mutations performed, so the UI can mirror them in CartContext.
  */
 export async function chat(userMessage, conversationHistory = []) {
   // Build conversation messages array
@@ -196,10 +164,75 @@ export async function chat(userMessage, conversationHistory = []) {
   // Fetch available tools
   const tools = await getAvailableTools()
 
-  try {
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
+  // Cap the number of tool rounds so a misbehaving model can't loop forever.
+  // Multi-step chains (e.g. create_cart_session -> add_to_cart) need >1 round.
+  const MAX_TOOL_ROUNDS = 5
 
+  // Cart mutations the bot performs this turn, surfaced to the UI for syncing.
+  const cartActions = []
+  const reply = (text) => ({ text, cartActions })
+
+  try {
+    for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
+      const data = await callModel(messages, tools)
+      const assistantMessage = data.message
+      messages.push(assistantMessage)
+
+      const toolCalls = assistantMessage?.tool_calls || []
+
+      // No tool calls (or out of rounds) - return the model's text answer
+      if (toolCalls.length === 0 || round === MAX_TOOL_ROUNDS) {
+        return reply(assistantMessage?.content || getFallbackResponse(userMessage))
+      }
+
+      // Execute each requested tool and feed results back for the next round
+      for (const toolCall of toolCalls) {
+        const toolName = toolCall.function.name
+        const toolArgs = typeof toolCall.function.arguments === 'string'
+          ? JSON.parse(toolCall.function.arguments || '{}')
+          : toolCall.function.arguments || {}
+
+        // Auto-manage the cart session so the model doesn't have to track IDs
+        if (CART_TOOLS.has(toolName) && !toolArgs.sessionId) {
+          toolArgs.sessionId = await ensureCartSession()
+        }
+
+        const result = await executeToolCall(toolName, toolArgs)
+
+        if (toolName === 'create_cart_session') captureSessionId(result)
+
+        // Mirror successful add-to-cart calls into the on-page cart
+        if (toolName === 'add_to_cart' && toolArgs.productHandle && /✅|added/i.test(result)) {
+          cartActions.push({
+            type: 'add',
+            handle: toolArgs.productHandle,
+            quantity: toolArgs.quantity || 1,
+          })
+        }
+
+        messages.push({
+          role: 'tool',
+          content: result,
+          tool_call_id: toolCall.id,
+        })
+      }
+    }
+
+    return reply(getFallbackResponse(userMessage))
+  } catch (error) {
+    console.error('[SupportBot] Chat error:', error.message)
+    return reply(getFallbackResponse(userMessage))
+  }
+}
+
+/**
+ * Single call to the Ollama chat API with tools enabled.
+ */
+async function callModel(messages, tools) {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
+
+  try {
     const response = await fetch(`${OLLAMA_URL}/api/chat`, {
       method: 'POST',
       headers: {
@@ -219,72 +252,13 @@ export async function chat(userMessage, conversationHistory = []) {
       signal: controller.signal,
     })
 
-    clearTimeout(timeoutId)
-
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`)
     }
 
-    const data = await response.json()
-    const assistantMessage = data.message
-
-    // Handle tool calls if present
-    if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
-      const toolResults = []
-
-      for (const toolCall of assistantMessage.tool_calls) {
-        const toolName = toolCall.function.name
-        const toolArgs = typeof toolCall.function.arguments === 'string'
-          ? JSON.parse(toolCall.function.arguments || '{}')
-          : toolCall.function.arguments || {}
-
-        const result = await executeToolCall(toolName, toolArgs)
-        toolResults.push({
-          role: 'tool',
-          content: result,
-          tool_call_id: toolCall.id,
-        })
-      }
-
-      // Send tool results back to get final response
-      const followUpMessages = [
-        ...messages,
-        assistantMessage,
-        ...toolResults,
-      ]
-
-      const followUpResponse = await fetch(`${OLLAMA_URL}/api/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: MODEL,
-          messages: followUpMessages,
-          stream: false,
-          tools,
-          options: {
-            num_predict: 300,
-            temperature: 0.7,
-            top_p: 0.9,
-          },
-        }),
-        signal: controller.signal,
-      })
-
-      if (!followUpResponse.ok) {
-        throw new Error(`Follow-up API error: ${followUpResponse.status}`)
-      }
-
-      const followUpData = await followUpResponse.json()
-      return followUpData.message?.content || getFallbackResponse(userMessage)
-    }
-
-    // No tool calls - return direct response
-    return assistantMessage?.content || getFallbackResponse(userMessage)
-  } catch (error) {
-    console.error('[SupportBot] Chat error:', error.message)
-    return getFallbackResponse(userMessage)
+    return await response.json()
+  } finally {
+    clearTimeout(timeoutId)
   }
 }
 
