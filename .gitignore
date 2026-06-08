@@ -30,8 +30,14 @@ dist-ssr
 .env.local
 .env.development.local
 .env.test.local
+.env.production
 .env.production.local
 
 # Runtime order/inquiry data (contains customer PII)
 mcp-server/data/orders.json
 mcp-server/data/inquiries.json
+
+# Agent / AI tooling files (kept local, not published)
+CLAUDE.md
+.mcp.json
+.claude/

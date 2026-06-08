@@ -229,7 +229,7 @@ Products conform to Shopify Storefront API format:
 
 ### Remote (Phase 4 - Future)
 
-HTTP transport will be implemented in Phase 4 for remote deployment to YOUR_MCP_DOMAIN
+HTTP transport (`--transport=http`) is used for remote deployment behind nginx.
 
 ## Development
 

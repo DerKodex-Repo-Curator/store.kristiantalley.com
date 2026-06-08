@@ -12,7 +12,11 @@ Environment="MCP_TRANSPORT=http"
 Environment="MCP_PORT=3001"
 Environment="MCP_DATA_SOURCE=json"
 
-# Load Shopify credentials if available
+# Server-side secrets live here (root-owned, chmod 600). Required keys:
+#   STRIPE_SECRET_KEY=sk_live_...        (or sk_test_ while testing)
+#   STRIPE_WEBHOOK_SECRET=whsec_...      (from the Stripe Dashboard webhook endpoint)
+#   SITE_URL=https://store.kristiantalley.com   (where Stripe returns the buyer)
+# Optional: STRIPE_SHIPPING_COUNTRIES, STRIPE_CURRENCY
 EnvironmentFile=-/etc/store.kristiantalley.com/env
 
 ExecStart=/usr/bin/node server.js --transport=http --port=3001

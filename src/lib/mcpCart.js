@@ -7,7 +7,7 @@
  * bot and the visual cart drawer always agree.
  */
 
-const OLLAMA_URL = import.meta.env.VITE_OLLAMA_URL || 'https://YOUR_MCP_DOMAIN'
+const OLLAMA_URL = import.meta.env.VITE_OLLAMA_URL || ''
 const MCP_BASE = import.meta.env.VITE_MCP_TOOLS_URL || `${OLLAMA_URL}/mcp`
 const MCP_ENDPOINT = `${MCP_BASE}/store`
 const REQUEST_TIMEOUT = 30000

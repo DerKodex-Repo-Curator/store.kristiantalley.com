@@ -1,94 +1,56 @@
 # KTT Shop
 
-Custom ecommerce storefront for KTT artwork, built with React, Tailwind CSS, and Shopify Storefront API. Design matches the minimal aesthetic of [kristiantalley.com](https://kristiantalley.com).
+Custom ecommerce storefront for KTT artwork, built with React + Tailwind. The
+product catalog is local JSON, payments run through **Stripe Checkout**, and a
+support bot (Ollama + a small MCP server) handles browsing and cart actions.
+Design matches the minimal aesthetic of [kristiantalley.com](https://kristiantalley.com).
 
-## Tech Stack
+> **Deploying to the Ubuntu/nginx server? See [CLAUDE.md](./CLAUDE.md)** — it has
+> the full runbook (systemd, nginx, Stripe secrets, webhook).
 
-- **Build Tool**: Vite
-- **Frontend**: React 18 (JavaScript)
-- **Styling**: Tailwind CSS
-- **Routing**: React Router v6
-- **Ecommerce**: Shopify Storefront API
-- **Deployment**: Static SPA served by nginx
+## Tech stack
 
-## Quick Start
+- **Build**: Vite · **Frontend**: React 18 + React Router 6 · **Styling**: Tailwind
+- **Catalog**: local JSON (`mcp-server/data/products.json`)
+- **Payments**: Stripe Checkout (server creates sessions; webhook records orders)
+- **Support bot**: Ollama LLM + MCP server (`mcp-server/`)
+- **Deploy**: static SPA on nginx + a Node service behind nginx
+
+## Quick start (local)
 
 ```bash
-# Install dependencies
 npm install
+cp .env.example .env          # set STRIPE_SECRET_KEY=sk_test_...
+npm run dev                   # storefront → http://localhost:5173
 
-# Copy environment variables
-cp .env.example .env
-# Edit .env with your Shopify credentials (optional for dev)
-
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
+# in another shell — the bot/cart/checkout backend:
+cd mcp-server && npm install && node server.js --transport=http --port=3001
 ```
 
-The site runs at `http://localhost:5173`. Without Shopify configured, it displays mock artwork data.
+Stripe webhook locally: `stripe listen --forward-to localhost:3001/webhook`, then
+put the printed `whsec_…` in `.env` as `STRIPE_WEBHOOK_SECRET`.
 
-## Project Structure
+## Layout
 
 ```
-src/
-├── main.jsx              # React entry point
-├── App.jsx               # Routes
-├── index.css             # Tailwind + custom styles
-├── components/
-│   ├── Layout.jsx        # Page wrapper
-│   ├── Sidebar.jsx       # Left sidebar navigation
-│   └── CartDrawer.jsx    # Slide-out cart
-├── pages/
-│   ├── HomePage.jsx      # Landing with featured work
-│   ├── ShopPage.jsx      # Masonry product grid
-│   ├── ProductPage.jsx   # Product detail
-│   ├── AboutPage.jsx     # Artist bio
-│   ├── ContactPage.jsx   # Contact form
-│   └── NotFoundPage.jsx  # 404
-├── context/
-│   └── CartContext.jsx   # Cart state
-└── lib/
-    └── shopifyClient.js  # Shopify API
+src/                         # React storefront
+├── pages/  components/  context/CartContext.jsx
+└── lib/    shopifyClient.js (catalog/data) · mcpCart.js · supportBot.js
+mcp-server/                  # Node backend
+├── server.js                # HTTP: /mcp/* (bot+cart), /checkout, /webhook
+├── checkout.js              # Stripe session + webhook handling
+├── data/products.json       # the catalog
+└── deploy/{nginx,systemd}/  # production config
+scripts/
+├── sync-data.js             # regenerate products.json from the frontend catalog
+└── deploy-mcp.sh            # deploy the backend to the server
 ```
 
-## Design
+## Editing inventory
 
-Matches kristiantalley.com:
-- Fixed left sidebar with KTT logo and navigation
-- Pure white background, black text
-- System sans-serif fonts (Helvetica Neue, etc.)
-- Masonry grid layout for artwork
-- Minimal, no-frills aesthetic
-
-## Shopify Setup
-
-1. Create a Shopify store and add products
-2. Create a Storefront API access token in Shopify Admin
-3. Configure `.env`:
-
-```bash
-VITE_SHOPIFY_STORE_DOMAIN=your-store.myshopify.com
-VITE_SHOPIFY_STOREFRONT_ACCESS_TOKEN=your-token
-VITE_SHOPIFY_API_VERSION=2024-10
-```
-
-## Deployment
-
-Build and deploy to nginx:
-
-```bash
-npm run build
-rsync -avz --delete ./dist/ user@server:/var/www/kristiantalley.com/dist/
-```
-
-See `nginx.conf.example` for server configuration.
-
-## Adding Artwork Images
-
-Replace placeholder image URLs in `src/lib/shopifyClient.js` with actual artwork images, or configure Shopify with your product images.
+The catalog is duplicated in three places — edit `src/lib/shopifyClient.js`
+(`getMockProducts`) **and** `scripts/sync-data.js`, then run
+`node scripts/sync-data.js` to regenerate `mcp-server/data/products.json`.
 
 ## Contact
 

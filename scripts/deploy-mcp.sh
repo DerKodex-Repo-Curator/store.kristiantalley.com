@@ -1,12 +1,12 @@
 #!/bin/bash
-# Deploy MCP Server to YOUR_MCP_DOMAIN
-# Usage: ./scripts/deploy-mcp.sh [--sync-only] [--no-restart]
+# Deploy the MCP server to the host that serves it.
+# Usage: REMOTE_HOST=user@your-server ./scripts/deploy-mcp.sh [--sync-only] [--no-restart]
 
 set -e
 
-# Configuration
-REMOTE_HOST="${REMOTE_HOST:-ubuntu@YOUR_MCP_DOMAIN}"
-REMOTE_PATH="/home/ubuntu/store.kristiantalley.com"
+# Configuration — set these via env (don't hardcode infra in the repo)
+REMOTE_HOST="${REMOTE_HOST:?set REMOTE_HOST, e.g. REMOTE_HOST=user@your-server}"
+REMOTE_PATH="${REMOTE_PATH:-/home/$(echo "$REMOTE_HOST" | sed 's/@.*//')/store.kristiantalley.com}"
 LOCAL_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DEPLOY_KEY="${DEPLOY_KEY:-$HOME/.ssh/id_rsa}"
 
@@ -59,14 +59,18 @@ rsync -ave "ssh -i $DEPLOY_KEY" \
   --exclude='node_modules' \
   --exclude='.git' \
   --exclude='*.log' \
+  --exclude='data' \
   "$LOCAL_PATH/mcp-server/" \
   "$REMOTE_HOST:$REMOTE_PATH/mcp-server/"
 
-# Step 4: Sync product data
-echo -e "${YELLOW}📊 Step 4: Syncing product data...${NC}"
+# Step 4: Sync ONLY the product catalog. We deliberately do NOT --delete or sync
+# the rest of data/ — carts.json, orders.json and inquiries.json are runtime
+# state living on the server and must never be overwritten by a deploy.
+echo -e "${YELLOW}📊 Step 4: Syncing product catalog (products.json only)...${NC}"
+ssh -i "$DEPLOY_KEY" "$REMOTE_HOST" "mkdir -p $REMOTE_PATH/mcp-server/data"
 rsync -ave "ssh -i $DEPLOY_KEY" \
-  "$LOCAL_PATH/mcp-server/data/" \
-  "$REMOTE_HOST:$REMOTE_PATH/mcp-server/data/"
+  "$LOCAL_PATH/mcp-server/data/products.json" \
+  "$REMOTE_HOST:$REMOTE_PATH/mcp-server/data/products.json"
 
 # Step 5: Install dependencies (if package.json changed)
 echo -e "${YELLOW}📦 Step 5: Installing dependencies on remote...${NC}"
@@ -108,8 +112,8 @@ fi
 # Final status
 echo -e "${GREEN}✅ Deployment complete!${NC}"
 echo ""
-echo "📍 MCP Server endpoint: https://YOUR_MCP_DOMAIN/mcp/store"
-echo "🏥 Health check: https://YOUR_MCP_DOMAIN/health"
+echo "📍 MCP Server endpoint: <your-mcp-domain>/mcp/store"
+echo "🏥 Health check: <your-mcp-domain>/health"
 echo ""
 echo "Remote logs:"
 echo "  journalctl -u mcp-server -f"

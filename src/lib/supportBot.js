@@ -1,12 +1,12 @@
 /**
  * KTT Store Support Bot
- * LLM-powered assistant using Ollama API at YOUR_MCP_DOMAIN
+ * LLM-powered assistant using a configured Ollama API endpoint (VITE_OLLAMA_URL)
  * Uses Qwen 3.6 with tool calling capabilities
  */
 
 import { executeToolCall, ensureCartSession } from './mcpCart'
 
-const OLLAMA_URL = import.meta.env.VITE_OLLAMA_URL || 'https://YOUR_MCP_DOMAIN'
+const OLLAMA_URL = import.meta.env.VITE_OLLAMA_URL || ''
 const MODEL = import.meta.env.VITE_MODEL || 'qwen36-opus:latest'
 const MCP_BASE = import.meta.env.VITE_MCP_TOOLS_URL || `${OLLAMA_URL}/mcp`
 const MCP_TOOLS_URL = `${MCP_BASE}/tools`
