@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react'
-import { fetchLiveProductByHandle, isShopifyConfigured } from '../lib/shopifyClient'
+import { fetchLiveProductByHandle } from '../lib/shopifyClient'
 import { reconcileBotCart } from '../lib/mcpCart'
 
 const CartContext = createContext(null)
@@ -119,11 +119,13 @@ export function CartProvider({ children }) {
     async (handle, quantity = 1) => {
       try {
         // Resolve the full detail shape (variant + image) the product page uses.
-        // getProductByHandle falls back to the FLAT list shape (no variants),
-        // which made every bot-driven add silently fail. Mirror ProductPage.
-        const product = isShopifyConfigured()
-          ? await getProductByHandle(handle)
-          : getMockProductByHandle(handle)
+        // fetchLiveProductByHandle returns the same detail shape ProductPage
+        // consumes (with variants[]/images[]) and falls back to the baked
+        // catalog when the live endpoint is unavailable. The previous code
+        // called getProductByHandle/getMockProductByHandle, which weren't
+        // imported here — a ReferenceError that made every bot-driven add
+        // silently fail (caught below, returning false).
+        const product = await fetchLiveProductByHandle(handle)
         const variant = product?.variants?.[0]
         if (!product || !variant) {
           console.warn(`[Cart] Could not resolve product for handle: ${handle}`)

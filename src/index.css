@@ -80,13 +80,15 @@
   .main-content {
     @apply min-h-screen;
     margin-left: 0;
-    @media (min-width: 768px) {
-      margin-left: 250px;
-    }
-    /* Account for mobile header on small screens */
+    /* Account for the fixed mobile header on small screens */
     padding-top: 4rem;
     /* Account for fixed footer */
     padding-bottom: 3rem;
+    @media (min-width: 768px) {
+      margin-left: 250px;
+      /* No mobile header on desktop — let content align with the sidebar top */
+      padding-top: 0;
+    }
   }
 
   /* Simple grid for artwork */

@@ -51,8 +51,8 @@ function StorePage() {
 
   return (
     <div className="min-h-screen">
-      {/* Header — tight top padding on desktop, accounts for mobile header */}
-      <div className="px-6 pt-4 pb-4 md:pt-20 border-b border-gray-200">
+      {/* Header — aligns with the sidebar's p-6 top on desktop; pt-4 sits below the mobile header */}
+      <div className="px-6 pt-4 pb-4 md:pt-6 border-b border-gray-200">
         <h1 className="text-xl font-normal mb-4">Store</h1>
 
         {/* Filters */}
