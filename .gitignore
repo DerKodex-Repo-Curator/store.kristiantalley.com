@@ -35,3 +35,6 @@ dist-ssr
 # Runtime order/inquiry data (contains customer PII)
 mcp-server/data/orders.json
 mcp-server/data/inquiries.json
+
+# Runtime cart state (live on server)
+mcp-server/data/carts.json
