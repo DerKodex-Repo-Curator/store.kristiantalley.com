@@ -1,11 +1,18 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { fetchLiveProducts } from '../lib/shopifyClient'
+import { useSeo } from '../lib/seo'
 
 /**
  * Store page with 2-column grid - matches product page desktop layout
  */
 function StorePage() {
+  useSeo({
+    title: 'Kristian Talley - Art Store',
+    description: 'Original one-of-a-kind artwork by Kristian Talley — paintings, illustrations, and prints, handmade and signed.',
+    canonical: 'https://store.kristiantalley.com/',
+    image: 'https://store.kristiantalley.com/products/pyromancer.jpg',
+  })
   const [searchParams, setSearchParams] = useSearchParams()
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)

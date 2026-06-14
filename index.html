@@ -4,8 +4,66 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/jpeg" href="/favicon.jpg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="KTT - Original artwork and prints by Kristian Talley" />
+
+    <!-- Primary SEO -->
     <title>Kristian Talley - Art Store</title>
+    <meta name="description" content="Original one-of-a-kind artwork by Kristian Talley — paintings, illustrations, and prints available for purchase. Each piece is handmade and signed." />
+    <meta name="author" content="Kristian Talley" />
+    <link rel="canonical" href="https://store.kristiantalley.com/" />
+    <meta name="theme-color" content="#ffffff" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Kristian Talley Art Store" />
+    <meta property="og:title" content="Kristian Talley - Art Store" />
+    <meta property="og:description" content="Original one-of-a-kind artwork by Kristian Talley — paintings, illustrations, and prints, handmade and signed." />
+    <meta property="og:url" content="https://store.kristiantalley.com/" />
+    <meta property="og:image" content="https://store.kristiantalley.com/products/pyromancer.jpg" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Kristian Talley - Art Store" />
+    <meta name="twitter:description" content="Original one-of-a-kind artwork by Kristian Talley, handmade and signed." />
+    <meta name="twitter:image" content="https://store.kristiantalley.com/products/pyromancer.jpg" />
+
+    <!-- Structured data: store + who I am -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Person",
+          "@id": "https://kristiantalley.com/#person",
+          "name": "Kristian Talley",
+          "url": "https://kristiantalley.com/",
+          "jobTitle": "Artist",
+          "sameAs": [
+            "https://www.instagram.com/kristian.talley/",
+            "https://kristiantalley.com/",
+            "https://design.kristiantalley.com/"
+          ]
+        },
+        {
+          "@type": "Store",
+          "@id": "https://store.kristiantalley.com/#store",
+          "name": "Kristian Talley Art Store",
+          "url": "https://store.kristiantalley.com/",
+          "image": "https://store.kristiantalley.com/products/pyromancer.jpg",
+          "description": "Original one-of-a-kind artwork by Kristian Talley — paintings, illustrations, and prints, handmade and signed.",
+          "founder": { "@id": "https://kristiantalley.com/#person" }
+        }
+      ]
+    }
+    </script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZX4410GSD3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-ZX4410GSD3');
+    </script>
   </head>
   <body>
     <div id="root"></div>

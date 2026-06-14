@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { fetchLiveProductByHandle } from '../lib/shopifyClient'
 import { useCart } from '../context/CartContext'
+import { useSeo } from '../lib/seo'
 
 /**
  * Product detail page - minimal layout matching KTT style
@@ -56,6 +57,40 @@ function ProductPage() {
     addItem(product, selectedVariant, 1)
     setAddedToCart(true)
   }
+
+  // Per-route SEO + Product structured data (live price/availability)
+  const cleanTitle = product ? product.title.replace(/"/g, '') : ''
+  const productImg = product
+    ? `https://store.kristiantalley.com${product.images?.[0]?.src || product.image || ''}`
+    : ''
+  useSeo(
+    product
+      ? {
+          title: `${cleanTitle} — Kristian Talley`,
+          description: product.description,
+          canonical: `https://store.kristiantalley.com/${product.handle}`,
+          image: productImg,
+          jsonLd: {
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            name: cleanTitle,
+            image: productImg,
+            description: product.description,
+            ...(product.medium ? { material: product.medium } : {}),
+            brand: { '@type': 'Person', name: 'Kristian Talley' },
+            offers: {
+              '@type': 'Offer',
+              price: String(selectedVariant?.price ?? product.price),
+              priceCurrency: 'USD',
+              availability: (selectedVariant?.available ?? product.available)
+                ? 'https://schema.org/InStock'
+                : 'https://schema.org/OutOfStock',
+              url: `https://store.kristiantalley.com/${product.handle}`,
+            },
+          },
+        }
+      : { title: 'Kristian Talley - Art Store' }
+  )
 
   if (loading) {
     return (
