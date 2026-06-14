@@ -128,7 +128,7 @@
   }
 
   .product-price {
-    @apply text-sm font-semibold text-gray-700;
+    @apply text-xs font-light tracking-wide text-gray-500 font-mono;
   }
 
   /* Buttons - minimal, black/white */

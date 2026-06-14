@@ -158,7 +158,7 @@ function Sidebar() {
         {/* Top section: Logo and Navigation */}
         <div>
           {/* Logo - KTT */}
-          <NavLink to="/" className="block text-logo font-normal tracking-wide mb-8">
+          <NavLink to="/" className="block text-logo font-light tracking-wider mb-8">
             KTT
           </NavLink>
 

@@ -132,7 +132,7 @@ function ProductPage() {
         {/* Details */}
         <div>
           <h1 className="text-xl font-normal mb-2">{product.title}</h1>
-          <p className="text-gray-600 mb-6">
+          <p className="text-sm font-light tracking-wide text-gray-500 font-mono mb-6">
             {isAvailable ? `$${selectedVariant?.price || product.price}` : 'Sold'}
           </p>
 
@@ -219,7 +219,7 @@ function ProductPage() {
 
           {/* Shipping info */}
           <p className="text-xs text-gray-400 mt-6">
-            Free shipping on orders over $200.
+            Free shipping on orders $200 and above.
             Questions? <Link to="/contact" className="underline">Contact me</Link>.
           </p>
         </div>

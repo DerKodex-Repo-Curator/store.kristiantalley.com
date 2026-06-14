@@ -3,6 +3,86 @@ import { chat, SUGGESTED_QUESTIONS, checkConnection } from '../lib/supportBot'
 import { useCart } from '../context/CartContext'
 
 /**
+ * Render inline markdown (bold, italic, inline code, links) within a line.
+ */
+function renderInline(text, keyPrefix) {
+  const nodes = []
+  const regex = /(\*\*([^*]+)\*\*|\*([^*]+)\*|`([^`]+)`|\[([^\]]+)\]\(([^)]+)\))/g
+  let last = 0
+  let m
+  let i = 0
+  while ((m = regex.exec(text)) !== null) {
+    if (m.index > last) nodes.push(text.slice(last, m.index))
+    if (m[2] !== undefined) nodes.push(<strong key={`${keyPrefix}-b${i}`}>{m[2]}</strong>)
+    else if (m[3] !== undefined) nodes.push(<em key={`${keyPrefix}-i${i}`}>{m[3]}</em>)
+    else if (m[4] !== undefined) nodes.push(<code key={`${keyPrefix}-c${i}`} className="px-1 bg-gray-200 rounded text-[0.85em]">{m[4]}</code>)
+    else if (m[5] !== undefined) nodes.push(
+      <a key={`${keyPrefix}-a${i}`} href={m[6]} target="_blank" rel="noopener noreferrer" className="underline">{m[5]}</a>
+    )
+    last = regex.lastIndex
+    i++
+  }
+  if (last < text.length) nodes.push(text.slice(last))
+  return nodes
+}
+
+/**
+ * Minimal markdown renderer: paragraphs, bullet lists, and inline formatting.
+ * Keeps the store's lean dependency set (no react-markdown).
+ */
+function Markdown({ text }) {
+  const lines = text.split('\n')
+  const blocks = []
+  let list = null
+  lines.forEach((line) => {
+    const bullet = line.match(/^\s*[-*]\s+(.*)$/)
+    if (bullet) {
+      if (!list) list = []
+      list.push(bullet[1])
+    } else {
+      if (list) { blocks.push({ type: 'ul', items: list }); list = null }
+      if (line.trim() !== '') blocks.push({ type: 'p', text: line })
+    }
+  })
+  if (list) blocks.push({ type: 'ul', items: list })
+
+  return (
+    <div className="space-y-1.5">
+      {blocks.map((b, i) =>
+        b.type === 'ul' ? (
+          <ul key={i} className="list-disc pl-4 space-y-0.5">
+            {b.items.map((it, j) => <li key={j}>{renderInline(it, `${i}-${j}`)}</li>)}
+          </ul>
+        ) : (
+          <p key={i}>{renderInline(b.text, `${i}`)}</p>
+        )
+      )}
+    </div>
+  )
+}
+
+/**
+ * Assistant message with a typewriter reveal, then markdown-rendered.
+ */
+function AssistantMessage({ content, onReveal }) {
+  const [shown, setShown] = useState('')
+  useEffect(() => {
+    let i = 0
+    const id = setInterval(() => {
+      i += 2
+      setShown(content.slice(0, i))
+      if (onReveal) onReveal()
+      if (i >= content.length) {
+        setShown(content)
+        clearInterval(id)
+      }
+    }, 15)
+    return () => clearInterval(id)
+  }, [content])
+  return <Markdown text={shown} />
+}
+
+/**
  * Support chat widget powered by LLM
  * Connects to Ollama server for AI-powered customer support
  */
@@ -34,6 +114,9 @@ function SupportChat() {
       inputRef.current.focus()
     }
   }, [isOpen])
+
+  // Keep the latest content in view while the typewriter reveals it
+  const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ block: 'end' })
 
   // Send message
   const handleSend = async (messageText = inputValue) => {
@@ -183,13 +266,15 @@ function SupportChat() {
                   className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[85%] text-sm px-3 py-2 ${
+                    className={`max-w-[85%] text-sm px-3 py-2 break-words ${
                       msg.role === 'user'
-                        ? 'bg-black text-white'
+                        ? 'bg-black text-white whitespace-pre-wrap'
                         : 'bg-gray-100 text-black'
                     }`}
                   >
-                    {msg.content}
+                    {msg.role === 'user'
+                      ? msg.content
+                      : <AssistantMessage content={msg.content} onReveal={scrollToBottom} />}
                   </div>
                 </div>
               ))

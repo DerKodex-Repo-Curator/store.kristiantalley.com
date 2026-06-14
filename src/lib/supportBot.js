@@ -35,7 +35,7 @@ PRODUCTS AVAILABLE:
 - Always look up exact titles, prices, and availability with the tools below
 
 SHIPPING & HANDLING:
-- Free shipping on orders over $200
+- Free shipping on orders $200 and above
 - Originals are carefully packaged with acid-free materials
 - Prints are shipped flat in rigid mailers
 - US domestic shipping: 5-7 business days
@@ -280,7 +280,7 @@ function getFallbackResponse(userMessage) {
   const lower = userMessage.toLowerCase()
 
   if (lower.includes('shipping') || lower.includes('delivery')) {
-    return 'Shipping is free on orders over $200. US orders typically arrive in 5-7 business days. International shipping takes 2-3 weeks. All orders include tracking.'
+    return 'Shipping is free on orders $200 and above. US orders typically arrive in 5-7 business days. International shipping takes 2-3 weeks. All orders include tracking.'
   }
 
   if (lower.includes('return') || lower.includes('refund')) {

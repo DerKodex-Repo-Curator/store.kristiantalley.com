@@ -62,7 +62,7 @@ function HelpPage() {
     },
     {
       question: 'How much does shipping cost?',
-      answer: 'Shipping is free on orders over $200. All orders include tracking. US domestic shipping typically takes 5-7 business days. International orders take 2-3 weeks.',
+      answer: 'Shipping is free on orders $200 and above. All orders include tracking. US domestic shipping typically takes 5-7 business days. International orders take 2-3 weeks.',
     },
     {
       question: 'Do you accept returns?',
