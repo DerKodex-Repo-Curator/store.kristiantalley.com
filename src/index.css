@@ -1,0 +1,221 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Styles matching ArtPortfolioSite aesthetic
+ * Minimal, clean, art-focused
+ */
+
+@theme {
+  /* Colors matching ArtPortfolioSite */
+  --color-primary: #ffffff;
+  --color-text: #000000;
+  --color-accent: #00deff;
+  --color-border: #0c0c0c;
+  --font-sans: 'Lato', 'Verdana', sans-serif;
+  --spacing-sidebar: 250px;
+}
+
+/* Base styles matching ArtPortfolioSite */
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-primary);
+    color: var(--color-text);
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+    font-size: 13px;
+  }
+
+  /* No serif fonts - everything is clean sans-serif */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans font-normal;
+  }
+
+  /* Link styles */
+  a {
+    color: var(--color-text);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  a:hover {
+    color: var(--color-accent);
+  }
+
+  img {
+    @apply max-w-full h-auto;
+  }
+}
+
+@layer components {
+  /* Desktop Sidebar - fixed left panel matching ArtPortfolioSite */
+  .sidebar {
+    @apply fixed top-0 left-0 h-screen w-[250px] bg-white z-[9999] flex flex-col p-6;
+    border-right: 1px solid rgba(12, 12, 12, 0.1);
+  }
+
+  /* Navigation links - uppercase, tracking, accent color */
+  .nav-link {
+    @apply block text-xs font-bold uppercase tracking-widest py-1;
+    @apply text-black transition-colors duration-300;
+    cursor: pointer;
+  }
+
+  .nav-link:hover {
+    @apply text-[#00deff];
+  }
+
+  .nav-link.active {
+    @apply text-[#00deff];
+  }
+
+  /* Main content area - offset by sidebar width */
+  .main-content {
+    @apply min-h-screen;
+    margin-left: 0;
+    @media (min-width: 768px) {
+      margin-left: 250px;
+    }
+    /* Account for mobile header on small screens */
+    padding-top: 4rem;
+    /* Account for fixed footer */
+    padding-bottom: 3rem;
+  }
+
+  /* Simple grid for artwork */
+  .grid {
+    display: grid;
+    gap: 16px;
+    padding: 24px;
+  }
+
+  .grid-item {
+    @apply break-inside-avoid;
+  }
+
+  .grid-item img {
+    @apply w-full block;
+  }
+
+  /* Product card - minimal */
+  .product-card {
+    @apply relative mb-4 break-inside-avoid;
+  }
+
+  .product-card img {
+    @apply w-full block transition-opacity duration-200;
+  }
+
+  .product-card:hover img {
+    @apply opacity-90;
+  }
+
+  .product-info {
+    @apply py-2;
+  }
+
+  .product-title {
+    @apply text-base font-medium leading-tight;
+  }
+
+  .product-price {
+    @apply text-sm font-semibold text-gray-700;
+  }
+
+  /* Buttons - minimal, black/white */
+  .btn {
+    @apply inline-block px-6 py-2 text-xs uppercase tracking-wider;
+    @apply border border-black text-black bg-white;
+    @apply transition-all duration-200;
+  }
+
+  .btn:hover {
+    @apply bg-black text-white;
+  }
+
+  .btn-filled {
+    @apply bg-black text-white;
+  }
+
+  .btn-filled:hover {
+    @apply bg-gray-800;
+  }
+
+  /* Horizontal line separator */
+  .separator {
+    @apply w-full h-px bg-gray-300 my-6;
+  }
+
+  /* Form inputs - minimal */
+  .input {
+    @apply w-full px-3 py-2 text-sm;
+    @apply border border-gray-300 bg-white;
+    @apply focus:outline-none focus:border-black;
+    @apply transition-colors duration-200;
+  }
+
+  .input::placeholder {
+    @apply text-gray-400;
+  }
+
+  /* Mobile Header - shown on small screens */
+  .mobile-header {
+    @apply fixed top-0 left-0 right-0 h-16 bg-white z-[9999] flex items-center justify-between px-4 md:hidden;
+    border-bottom: 1px solid rgba(12, 12, 12, 0.1);
+  }
+
+  .mobile-header-logo {
+    @apply text-2xl font-light tracking-wider hover:text-[#00deff] transition-colors;
+  }
+
+  .mobile-header-actions {
+    @apply flex items-center gap-3;
+  }
+
+  .mobile-menu-btn {
+    @apply p-2 hover:text-[#00deff] transition-colors;
+  }
+
+  .mobile-cart-btn {
+    @apply p-2 hover:text-[#00deff] transition-colors flex items-center gap-1;
+  }
+
+  /* Mobile Menu Overlay */
+  .mobile-menu-overlay {
+    @apply fixed inset-0 bg-black/50 z-[9998] md:hidden;
+  }
+
+  /* Mobile Menu - slide out from left */
+  .mobile-menu {
+    @apply fixed top-16 left-0 h-[calc(100vh-4rem)] w-[250px] bg-white z-[9999] flex flex-col p-6;
+    border-right: 1px solid rgba(12, 12, 12, 0.1);
+    transition: transform 0.3s ease-out;
+  }
+
+  .mobile-menu.open {
+    transform: translateX(0);
+  }
+
+  .mobile-menu.closed {
+    transform: translateX(-100%);
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
