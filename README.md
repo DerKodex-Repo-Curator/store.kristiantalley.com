@@ -2,7 +2,6 @@
 
 A headless Stripe storefront for KTT artwork. The product catalog is local JSON (no Shopify), payments run through **Stripe Checkout** (hosted payment pages), and a support bot (Ollama + a small MCP server) handles browsing and cart actions. Design matches the minimal aesthetic of [kristiantalley.com](https://kristiantalley.com).
 
-> **Deploying to the Ubuntu/nginx server? See [CLAUDE.md](./CLAUDE.md)** — it has the full runbook (systemd, nginx, Stripe secrets, webhook).
 
 ## Architecture
 
